@@ -314,4 +314,24 @@
     }
     return false;
   }
+
+  // ── font scale ──
+  function applyFontScale(scale) {
+    var pageFont = parseFloat(getComputedStyle(document.body).fontSize) || 16;
+    var size = pageFont * scale;
+    tBtn.style.fontSize = size + 'px';
+    cBtn.style.fontSize = size + 'px';
+    tBubble.style.fontSize = size + 'px';
+    cBubble.style.fontSize = size + 'px';
+  }
+
+  chrome.storage.sync.get('fontScale', function (data) {
+    applyFontScale(data.fontScale || 1.0);
+  });
+
+  chrome.storage.onChanged.addListener(function (changes) {
+    if (changes.fontScale) {
+      applyFontScale(changes.fontScale.newValue || 1.0);
+    }
+  });
 })();

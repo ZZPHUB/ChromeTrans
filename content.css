@@ -8,7 +8,7 @@
   border-radius: 50%;
   background: #1a73e8;
   color: #fff;
-  font-size: 13px;
+  font-size: 0.93em;
   font-weight: 700;
   font-family: system-ui, sans-serif;
   align-items: center;
@@ -33,7 +33,7 @@
   border-radius: 50%;
   background: #0d9488;
   color: #fff;
-  font-size: 13px;
+  font-size: 0.93em;
   font-weight: 700;
   font-family: system-ui, sans-serif;
   align-items: center;
@@ -60,7 +60,7 @@
   border-radius: 10px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.18);
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: 14px;
+  font-size: 1em;
   line-height: 1.6;
   color: #333;
   overflow: hidden;
@@ -82,13 +82,13 @@
   user-select: none;
 }
 .ds-t-title {
-  font-size: 12px;
+  font-size: 0.857em;
   font-weight: 600;
   color: #5f6368;
   pointer-events: none;
 }
 .ds-t-close {
-  font-size: 18px;
+  font-size: 1.286em;
   color: #999;
   cursor: pointer;
   line-height: 1;
@@ -100,7 +100,7 @@
 .ds-t-result {
   flex: 1 1 auto;
   padding: 10px 14px 14px;
-  font-size: 15px;
+  font-size: 1.071em;
   color: #1a1a1a;
   white-space: pre-wrap;
   word-break: break-word;
@@ -131,7 +131,7 @@
   border-radius: 10px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.18);
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: 14px;
+  font-size: 1em;
   line-height: 1.5;
   color: #333;
   overflow: hidden;
@@ -153,13 +153,13 @@
   user-select: none;
 }
 .ds-c-title {
-  font-size: 13px;
+  font-size: 0.93em;
   font-weight: 600;
   color: #5f6368;
   pointer-events: none;
 }
 .ds-c-close {
-  font-size: 18px;
+  font-size: 1.286em;
   color: #999;
   cursor: pointer;
   line-height: 1;
@@ -171,7 +171,7 @@
 .ds-c-context {
   flex-shrink: 0;
   padding: 8px 14px;
-  font-size: 12px;
+  font-size: 0.857em;
   color: #5f6368;
   background: #f8f9fa;
   border-bottom: 1px solid #e8eaed;
@@ -192,7 +192,7 @@
   max-width: 80%;
   padding: 8px 12px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 1em;
   line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
@@ -222,7 +222,7 @@
   border: 1px solid #dadce0;
   border-radius: 8px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 1em;
   resize: none;
   outline: none;
   line-height: 1.4;
@@ -234,7 +234,7 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 1em;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -277,7 +277,7 @@
   background: #1e1e1e;
   border-radius: 6px;
   overflow-x: auto;
-  font-size: 13px;
+  font-size: 0.93em;
   line-height: 1.45;
 }
 
