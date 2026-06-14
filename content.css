@@ -250,6 +250,88 @@
   user-select: none;
 }
 
+/* ── markdown rendered content ── */
+.ds-msg-assistant h1, .ds-msg-assistant h2, .ds-msg-assistant h3,
+.ds-msg-assistant h4, .ds-msg-assistant h5, .ds-msg-assistant h6 {
+  margin: 6px 0 4px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.ds-msg-assistant h1 { font-size: 1.3em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; }
+.ds-msg-assistant h2 { font-size: 1.15em; }
+.ds-msg-assistant h3 { font-size: 1.05em; }
+
+.ds-msg-assistant p { margin: 4px 0; }
+.ds-msg-assistant p:first-child { margin-top: 0; }
+.ds-msg-assistant p:last-child  { margin-bottom: 0; }
+
+.ds-msg-assistant ul, .ds-msg-assistant ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+.ds-msg-assistant li { margin: 2px 0; }
+
+.ds-msg-assistant pre {
+  margin: 6px 0;
+  padding: 10px 12px;
+  background: #1e1e1e;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.ds-msg-assistant pre code {
+  background: transparent;
+  padding: 0;
+  color: #d4d4d4;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', monospace;
+}
+
+.ds-msg-assistant :not(pre) > code {
+  background: rgba(175, 184, 193, 0.2);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', monospace;
+}
+
+.ds-msg-assistant blockquote {
+  margin: 6px 0;
+  padding: 6px 12px;
+  border-left: 3px solid #1a73e8;
+  background: rgba(26, 115, 232, 0.05);
+  border-radius: 0 6px 6px 0;
+}
+.ds-msg-assistant blockquote p { margin: 0; }
+
+.ds-msg-assistant hr {
+  border: none;
+  border-top: 1px solid #dadce0;
+  margin: 8px 0;
+}
+
+.ds-msg-assistant a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+.ds-msg-assistant a:hover { text-decoration: underline; }
+
+.ds-msg-assistant table {
+  border-collapse: collapse;
+  margin: 6px 0;
+  width: 100%;
+}
+.ds-msg-assistant th, .ds-msg-assistant td {
+  border: 1px solid #dadce0;
+  padding: 6px 10px;
+  text-align: left;
+  font-size: 0.95em;
+}
+.ds-msg-assistant th { background: #f5f7fa; font-weight: 600; }
+
+.ds-msg-assistant img { max-width: 100%; border-radius: 4px; }
+
 /* ── spinner ── */
 .ds-spinner {
   width: 24px;

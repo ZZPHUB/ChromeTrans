@@ -166,11 +166,14 @@
 
     cInput.value = '';
     cInput.style.height = 'auto';
-    appendChatMsg('user', userMsg);
 
-    // build full message array
+    var userEl = document.createElement('div');
+    userEl.className = 'ds-msg ds-msg-user';
+    userEl.textContent = userMsg;
+    cMessages.appendChild(userEl);
+
     var msgs = [
-      { role: 'system', content: 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.' }
+      { role: 'system', content: 'You are a helpful assistant. Answer questions about the provided text concisely and accurately. Use markdown formatting for code, lists, and emphasis when appropriate.' }
     ];
 
     if (chatHistory.length === 0) {
@@ -184,33 +187,30 @@
     }
 
     chatHistory.push({ role: 'user', content: userMsg });
-    var loadingEl = appendChatMsg('assistant', '');
+
+    var loadingEl = document.createElement('div');
+    loadingEl.className = 'ds-msg ds-msg-assistant';
+    loadingEl.innerHTML = '<div class="ds-spinner"></div>';
+    cMessages.appendChild(loadingEl);
+    cMessages.scrollTop = cMessages.scrollHeight;
 
     try {
       var res = await chrome.runtime.sendMessage({ type: 'chat', messages: msgs });
-      loadingEl.textContent = res.error || res.reply || '(empty)';
-      var reply = loadingEl.textContent;
-      if (!res.error) {
+
+      if (res.error) {
+        loadingEl.textContent = 'Error: ' + res.error;
+      } else {
+        var reply = (res.reply || '').trim();
+        loadingEl.innerHTML = reply ? renderMarkdown(reply) : '(empty)';
         chatHistory.push({ role: 'assistant', content: reply });
       }
     } catch (err) {
       loadingEl.textContent = 'Request failed: ' + err.message;
     }
 
+    cMessages.scrollTop = cMessages.scrollHeight;
     isChatting = false;
     cInput.focus();
-  }
-
-  function appendChatMsg(role, content) {
-    var el = document.createElement('div');
-    el.className = 'ds-msg ds-msg-' + role;
-    el.textContent = content;
-    if (role === 'assistant' && !content) {
-      el.innerHTML = '<div class="ds-spinner"></div>';
-    }
-    cMessages.appendChild(el);
-    cMessages.scrollTop = cMessages.scrollHeight;
-    return el;
   }
 
   // ── drag (translate bubble) ──
