@@ -1,48 +1,72 @@
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type !== 'translate') return;
+var SYSTEM_TRANSLATE = 'You are an English-to-Chinese translator. Output only the translation. No explanations, no notes, no extra text.';
+var SYSTEM_CHAT = 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.';
 
-  (async () => {
-    const { apiKey } = await chrome.storage.sync.get('apiKey');
-    if (!apiKey) {
-      sendResponse({ error: '请先设置 DeepSeek API Key' });
-      return;
-    }
-    try {
-      const translation = await translateText(msg.text, apiKey);
-      sendResponse({ translation });
-    } catch (err) {
-      sendResponse({ error: err.message });
-    }
-  })();
-
-  return true;
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+  if (msg.type === 'translate') {
+    handleTranslate(msg, sendResponse);
+    return true;
+  }
+  if (msg.type === 'chat') {
+    handleChat(msg, sendResponse);
+    return true;
+  }
 });
 
-async function translateText(text, apiKey) {
-  const res = await fetch('https://api.deepseek.com/chat/completions', {
+async function handleTranslate(msg, sendResponse) {
+  var apiKey = await getApiKey(sendResponse);
+  if (!apiKey) return;
+
+  try {
+    var result = await callDeepSeek([
+      { role: 'system', content: SYSTEM_TRANSLATE },
+      { role: 'user', content: msg.text }
+    ], apiKey);
+    sendResponse({ translation: result });
+  } catch (err) {
+    sendResponse({ error: err.message });
+  }
+}
+
+async function handleChat(msg, sendResponse) {
+  var apiKey = await getApiKey(sendResponse);
+  if (!apiKey) return;
+
+  try {
+    var result = await callDeepSeek(msg.messages, apiKey);
+    sendResponse({ reply: result });
+  } catch (err) {
+    sendResponse({ error: err.message });
+  }
+}
+
+async function getApiKey(sendResponse) {
+  var data = await chrome.storage.sync.get('apiKey');
+  if (!data.apiKey) {
+    sendResponse({ error: 'Please set your DeepSeek API Key first' });
+    return null;
+  }
+  return data.apiKey;
+}
+
+async function callDeepSeek(messages, apiKey) {
+  var res = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
+      'Authorization': 'Bearer ' + apiKey
     },
     body: JSON.stringify({
       model: 'deepseek-v4-pro',
       thinking: { type: 'disabled' },
-      messages: [
-        {
-          role: 'system',
-          content: '你是一个英译中翻译助手。只输出翻译结果，不要任何解释、注释或额外文字。'
-        },
-        { role: 'user', content: text }
-      ]
+      messages: messages
     })
   });
 
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API ${res.status}: ${body}`);
+    var body = await res.text();
+    throw new Error('API ' + res.status + ': ' + body);
   }
 
-  const data = await res.json();
+  var data = await res.json();
   return data.choices[0].message.content.trim();
 }

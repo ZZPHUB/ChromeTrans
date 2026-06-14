@@ -3,131 +3,278 @@
 
   var selectedText = '';
   var isTranslating = false;
-  var dragState = null; // { type, startX, startY, startLeft, startTop, startW, startH }
+  var isChatting = false;
+  var dragState = null;
+  var chatContext = '';
+  var chatHistory = [];
 
-  // ── create floating button ──
-  var btn = document.createElement('div');
-  btn.id = 'ds-trans-btn';
-  btn.textContent = '译';
-  document.body.appendChild(btn);
+  // ── translate button ──
+  var tBtn = document.createElement('div');
+  tBtn.id = 'ds-t-btn';
+  tBtn.textContent = 'T';
+  tBtn.title = 'Translate';
+  document.body.appendChild(tBtn);
 
-  // ── create translation bubble ──
-  var bubble = document.createElement('div');
-  bubble.id = 'ds-trans-bubble';
-  bubble.innerHTML = '<div class="ds-bubble-header"><span class="ds-bubble-title">翻译</span><span class="ds-bubble-close">&times;</span></div><div class="ds-bubble-result"></div><div class="ds-bubble-resize"></div>';
-  document.body.appendChild(bubble);
+  // ── chat button ──
+  var cBtn = document.createElement('div');
+  cBtn.id = 'ds-c-btn';
+  cBtn.textContent = 'C';
+  cBtn.title = 'Chat';
+  document.body.appendChild(cBtn);
 
-  var bubbleClose  = bubble.querySelector('.ds-bubble-close');
-  var bubbleResult = bubble.querySelector('.ds-bubble-result');
-  var bubbleHeader = bubble.querySelector('.ds-bubble-header');
-  var bubbleResize = bubble.querySelector('.ds-bubble-resize');
+  // ── translate bubble ──
+  var tBubble = document.createElement('div');
+  tBubble.id = 'ds-t-bubble';
+  tBubble.innerHTML = '<div class="ds-t-header"><span class="ds-t-title">Translate</span><span class="ds-t-close">&times;</span></div><div class="ds-t-result"></div><div class="ds-t-resize"></div>';
+  document.body.appendChild(tBubble);
+  var tClose  = tBubble.querySelector('.ds-t-close');
+  var tResult = tBubble.querySelector('.ds-t-result');
+  var tHeader = tBubble.querySelector('.ds-t-header');
+  var tResize = tBubble.querySelector('.ds-t-resize');
 
-  // ── event: detect text selection ──
+  // ── chat bubble ──
+  var cBubble = document.createElement('div');
+  cBubble.id = 'ds-c-bubble';
+  cBubble.innerHTML = '<div class="ds-c-header"><span class="ds-c-title">Chat with DeepSeek</span><span class="ds-c-close">&times;</span></div><div class="ds-c-context"></div><div class="ds-c-messages"></div><div class="ds-c-input-row"><textarea class="ds-c-input" placeholder="Ask about the selected text..." rows="1"></textarea><button class="ds-c-send">Send</button></div><div class="ds-c-resize"></div>';
+  document.body.appendChild(cBubble);
+  var cClose    = cBubble.querySelector('.ds-c-close');
+  var cContext  = cBubble.querySelector('.ds-c-context');
+  var cMessages = cBubble.querySelector('.ds-c-messages');
+  var cInput    = cBubble.querySelector('.ds-c-input');
+  var cSendBtn  = cBubble.querySelector('.ds-c-send');
+  var cHeader   = cBubble.querySelector('.ds-c-header');
+  var cResize   = cBubble.querySelector('.ds-c-resize');
+
+  // ── selection detection ──
   document.addEventListener('mouseup', function (e) {
-    if (isOurUI(e.target) || isTranslating) return;
+    if (isOurUI(e.target)) return;
     setTimeout(function () {
       var sel = window.getSelection();
       var text = (sel && sel.toString().trim()) || '';
       if (text) {
         selectedText = text;
         var rect = sel.getRangeAt(0).getBoundingClientRect();
-        btn.style.left = (rect.right + 6) + 'px';
-        btn.style.top  = (rect.top + rect.height / 2 - 14) + 'px';
-        btn.style.display = 'flex';
+        tBtn.style.left = (rect.right + 6) + 'px';
+        tBtn.style.top  = (rect.top + rect.height / 2 - 14) + 'px';
+        tBtn.style.display = 'flex';
+        cBtn.style.left = (rect.right + 38) + 'px';
+        cBtn.style.top  = (rect.top + rect.height / 2 - 14) + 'px';
+        cBtn.style.display = 'flex';
       } else {
-        btn.style.display = 'none';
+        tBtn.style.display = 'none';
+        cBtn.style.display = 'none';
       }
     }, 10);
   });
 
-  // ── event: scroll hides button ──
+  // ── scroll hides buttons ──
   document.addEventListener('scroll', function () {
-    if (!isTranslating) btn.style.display = 'none';
+    tBtn.style.display = 'none';
+    cBtn.style.display = 'none';
   }, true);
 
-  // ── event: click outside dismisses bubble ──
+  // ── click outside dismisses bubbles ──
   document.addEventListener('mousedown', function (e) {
-    if (!isOurUI(e.target)) bubble.style.display = 'none';
+    if (!isOurUI(e.target)) {
+      tBubble.style.display = 'none';
+      cBubble.style.display = 'none';
+    }
   });
 
-  // ── button → translate ──
-  btn.addEventListener('mousedown', function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-  });
+  // ── prevent buttons from clearing selection ──
+  tBtn.addEventListener('mousedown', function (e) { e.stopPropagation(); e.preventDefault(); });
+  cBtn.addEventListener('mousedown', function (e) { e.stopPropagation(); e.preventDefault(); });
 
-  btn.addEventListener('click', async function () {
+  // ── TRANSLATE button ──
+  tBtn.addEventListener('click', async function () {
     if (isTranslating || !selectedText) return;
+    closeBubble(cBubble);
     isTranslating = true;
 
-    var btnRect = btn.getBoundingClientRect();
-    bubbleResult.innerHTML = '<div class="ds-spinner"></div>';
+    var rect = tBtn.getBoundingClientRect();
+    tResult.innerHTML = '<div class="ds-spinner"></div>';
+    resizeChatInput();
 
-    // reset any previous resize, show to measure natural height
-    bubble.style.width = '';
-    bubble.style.height = '';
-    bubble.style.display = 'block';
+    tBubble.style.width = '';
+    tBubble.style.height = '';
+    tBubble.style.display = 'block';
     var bw = 320;
-    var bh = bubble.offsetHeight;
-
-    var bx = btnRect.right + 8;
-    var by = btnRect.bottom + 4;
+    var bh = tBubble.offsetHeight;
+    var bx = rect.right + 8;
+    var by = rect.bottom + 4;
     if (bx + bw > window.innerWidth) bx = window.innerWidth - bw - 12;
     if (bx < 12) bx = 12;
-    if (by + bh > window.innerHeight) by = btnRect.top - bh - 4;
+    if (by + bh > window.innerHeight) by = rect.top - bh - 4;
     if (by < 12) by = 12;
-
-    bubble.style.left = bx + 'px';
-    bubble.style.top  = by + 'px';
-    btn.style.display = 'none';
+    tBubble.style.left = bx + 'px';
+    tBubble.style.top  = by + 'px';
+    tBtn.style.display = 'none';
+    cBtn.style.display = 'none';
 
     try {
       var res = await chrome.runtime.sendMessage({ type: 'translate', text: selectedText });
-      bubbleResult.textContent = res.error || res.translation || '(空)';
+      tResult.textContent = res.error || res.translation || '(empty)';
     } catch (err) {
-      bubbleResult.textContent = '请求失败: ' + err.message;
+      tResult.textContent = 'Request failed: ' + err.message;
     }
     isTranslating = false;
   });
 
-  // ── drag ──
-  bubbleHeader.addEventListener('mousedown', function (e) {
-    if (e.target === bubbleClose) return;
+  // ── CHAT button ──
+  cBtn.addEventListener('click', function () {
+    if (!selectedText) return;
+    closeBubble(tBubble);
+    tBtn.style.display = 'none';
+    cBtn.style.display = 'none';
+
+    chatContext = selectedText;
+    chatHistory = [];
+    cMessages.innerHTML = '';
+    cContext.textContent = selectedText;
+    cInput.value = '';
+
+    cBubble.style.width = '';
+    cBubble.style.height = '';
+    cBubble.style.display = 'block';
+
+    var rect = cBtn.getBoundingClientRect();
+    var bx = rect.right + 8;
+    var by = rect.bottom + 4;
+    if (bx + 380 > window.innerWidth) bx = window.innerWidth - 380 - 12;
+    if (bx < 12) bx = 12;
+    if (by + 440 > window.innerHeight) by = rect.top - 440 - 4;
+    if (by < 12) by = 12;
+    cBubble.style.left = bx + 'px';
+    cBubble.style.top  = by + 'px';
+
+    cInput.focus();
+  });
+
+  // ── send chat message ──
+  cSendBtn.addEventListener('click', sendChat);
+  cInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendChat();
+    }
+  });
+
+  async function sendChat() {
+    var userMsg = cInput.value.trim();
+    if (!userMsg || isChatting) return;
+    isChatting = true;
+
+    cInput.value = '';
+    cInput.style.height = 'auto';
+    appendChatMsg('user', userMsg);
+
+    // build full message array
+    var msgs = [
+      { role: 'system', content: 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.' }
+    ];
+
+    if (chatHistory.length === 0) {
+      msgs.push({ role: 'user', content: 'Reference text:\n"""\n' + chatContext + '\n"""\n\n' + userMsg });
+    } else {
+      msgs.push({ role: 'user', content: 'Reference text:\n"""\n' + chatContext + '\n"""' });
+      for (var i = 0; i < chatHistory.length; i++) {
+        msgs.push(chatHistory[i]);
+      }
+      msgs.push({ role: 'user', content: userMsg });
+    }
+
+    chatHistory.push({ role: 'user', content: userMsg });
+    var loadingEl = appendChatMsg('assistant', '');
+
+    try {
+      var res = await chrome.runtime.sendMessage({ type: 'chat', messages: msgs });
+      loadingEl.textContent = res.error || res.reply || '(empty)';
+      var reply = loadingEl.textContent;
+      if (!res.error) {
+        chatHistory.push({ role: 'assistant', content: reply });
+      }
+    } catch (err) {
+      loadingEl.textContent = 'Request failed: ' + err.message;
+    }
+
+    isChatting = false;
+    cInput.focus();
+  }
+
+  function appendChatMsg(role, content) {
+    var el = document.createElement('div');
+    el.className = 'ds-msg ds-msg-' + role;
+    el.textContent = content;
+    if (role === 'assistant' && !content) {
+      el.innerHTML = '<div class="ds-spinner"></div>';
+    }
+    cMessages.appendChild(el);
+    cMessages.scrollTop = cMessages.scrollHeight;
+    return el;
+  }
+
+  // ── drag (translate bubble) ──
+  tHeader.addEventListener('mousedown', function (e) {
+    if (e.target === tClose) return;
     e.preventDefault();
     dragState = {
-      type: 'drag',
-      startX: e.clientX,
-      startY: e.clientY,
-      startLeft: parseInt(bubble.style.left) || 0,
-      startTop: parseInt(bubble.style.top) || 0
+      type: 'drag-t',
+      startX: e.clientX, startY: e.clientY,
+      startLeft: parseInt(tBubble.style.left) || 0,
+      startTop: parseInt(tBubble.style.top) || 0
     };
   });
 
-  // ── resize ──
-  bubbleResize.addEventListener('mousedown', function (e) {
+  // ── drag (chat bubble) ──
+  cHeader.addEventListener('mousedown', function (e) {
+    if (e.target === cClose) return;
     e.preventDefault();
-    e.stopPropagation();
     dragState = {
-      type: 'resize',
-      startX: e.clientX,
-      startY: e.clientY,
-      startW: bubble.offsetWidth,
-      startH: bubble.offsetHeight
+      type: 'drag-c',
+      startX: e.clientX, startY: e.clientY,
+      startLeft: parseInt(cBubble.style.left) || 0,
+      startTop: parseInt(cBubble.style.top) || 0
+    };
+  });
+
+  // ── resize (translate bubble) ──
+  tResize.addEventListener('mousedown', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    dragState = {
+      type: 'resize-t',
+      startX: e.clientX, startY: e.clientY,
+      startW: tBubble.offsetWidth, startH: tBubble.offsetHeight
+    };
+  });
+
+  // ── resize (chat bubble) ──
+  cResize.addEventListener('mousedown', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    dragState = {
+      type: 'resize-c',
+      startX: e.clientX, startY: e.clientY,
+      startW: cBubble.offsetWidth, startH: cBubble.offsetHeight
     };
   });
 
   document.addEventListener('mousemove', function (e) {
     if (!dragState) return;
-    if (dragState.type === 'drag') {
-      bubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
-      bubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
-    } else if (dragState.type === 'resize') {
+    if (dragState.type === 'drag-t') {
+      tBubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
+      tBubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
+    } else if (dragState.type === 'drag-c') {
+      cBubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
+      cBubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
+    } else if (dragState.type === 'resize-t') {
       var w = Math.max(200, dragState.startW + e.clientX - dragState.startX);
       var h = Math.max(80,  dragState.startH + e.clientY - dragState.startY);
-      w = Math.min(w, window.innerWidth - 12);
-      h = Math.min(h, window.innerHeight - 12);
-      bubble.style.width = w + 'px';
-      bubble.style.height = h + 'px';
+      tBubble.style.width = Math.min(w, window.innerWidth - 12) + 'px';
+      tBubble.style.height = Math.min(h, window.innerHeight - 12) + 'px';
+    } else if (dragState.type === 'resize-c') {
+      var w = Math.max(300, dragState.startW + e.clientX - dragState.startX);
+      var h = Math.max(200, dragState.startH + e.clientY - dragState.startY);
+      cBubble.style.width = Math.min(w, window.innerWidth - 12) + 'px';
+      cBubble.style.height = Math.min(h, window.innerHeight - 12) + 'px';
     }
   });
 
@@ -135,16 +282,26 @@
     dragState = null;
   });
 
-  // ── bubble close button ──
-  bubbleClose.addEventListener('click', function (e) {
-    e.stopPropagation();
-    bubble.style.display = 'none';
-  });
+  // ── close buttons ──
+  tClose.addEventListener('click', function (e) { e.stopPropagation(); closeBubble(tBubble); });
+  cClose.addEventListener('click', function (e) { e.stopPropagation(); closeBubble(cBubble); });
 
-  // ── helper: matches our UI elements ──
+  function closeBubble(el) {
+    el.style.display = 'none';
+  }
+
+  // ── chat input auto-resize ──
+  cInput.addEventListener('input', resizeChatInput);
+
+  function resizeChatInput() {
+    cInput.style.height = 'auto';
+    cInput.style.height = Math.min(cInput.scrollHeight, 100) + 'px';
+  }
+
+  // ── helper ──
   function isOurUI(el) {
     while (el) {
-      if (el === btn || el === bubble) return true;
+      if (el === tBtn || el === cBtn || el === tBubble || el === cBubble) return true;
       el = el.parentElement;
     }
     return false;

@@ -1,5 +1,5 @@
-/* ── floating button ── */
-#ds-trans-btn {
+/* ── translate button ── */
+#ds-t-btn {
   position: fixed;
   z-index: 2147483647;
   display: none;
@@ -9,29 +9,47 @@
   background: #1a73e8;
   color: #fff;
   font-size: 13px;
+  font-weight: 700;
   font-family: system-ui, sans-serif;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.35);
+  box-shadow: 0 2px 8px rgba(26,115,232,0.35);
   user-select: none;
   transition: transform 0.15s ease, opacity 0.15s ease;
   transform: scale(0.85);
   opacity: 0;
 }
+#ds-t-btn[style*="display: flex"] { transform: scale(1); opacity: 1; }
+#ds-t-btn:hover { background: #1557b0; transform: scale(1.1); }
 
-#ds-trans-btn[style*="display: flex"] {
-  transform: scale(1);
-  opacity: 1;
+/* ── chat button ── */
+#ds-c-btn {
+  position: fixed;
+  z-index: 2147483647;
+  display: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0d9488;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(13,148,136,0.35);
+  user-select: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  transform: scale(0.85);
+  opacity: 0;
 }
+#ds-c-btn[style*="display: flex"] { transform: scale(1); opacity: 1; }
+#ds-c-btn:hover { background: #0f766e; transform: scale(1.1); }
 
-#ds-trans-btn:hover {
-  background: #1557b0;
-  transform: scale(1.1);
-}
-
-/* ── translation bubble ── */
-#ds-trans-bubble {
+/* ── translate bubble ── */
+#ds-t-bubble {
   position: fixed;
   z-index: 2147483646;
   display: none;
@@ -40,20 +58,19 @@
   max-width: calc(100vw - 12px);
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.6;
   color: #333;
   overflow: hidden;
 }
-
-#ds-trans-bubble[style*="display: block"] {
+#ds-t-bubble[style*="display: block"] {
   display: flex !important;
   flex-direction: column;
 }
 
-.ds-bubble-header {
+.ds-t-header {
   display: flex;
   flex-shrink: 0;
   justify-content: space-between;
@@ -64,31 +81,23 @@
   cursor: move;
   user-select: none;
 }
-
-.ds-bubble-title {
+.ds-t-title {
   font-size: 12px;
   font-weight: 600;
   color: #5f6368;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   pointer-events: none;
 }
-
-.ds-bubble-close {
+.ds-t-close {
   font-size: 18px;
   color: #999;
   cursor: pointer;
   line-height: 1;
   padding: 0 2px;
   transition: color 0.15s;
-  pointer-events: auto;
 }
+.ds-t-close:hover { color: #333; }
 
-.ds-bubble-close:hover {
-  color: #333;
-}
-
-.ds-bubble-result {
+.ds-t-result {
   flex: 1 1 auto;
   padding: 10px 14px 14px;
   font-size: 15px;
@@ -99,19 +108,149 @@
   overflow-y: auto;
 }
 
-/* ── resize handle ── */
-.ds-bubble-resize {
+.ds-t-resize {
   flex-shrink: 0;
   height: 12px;
   cursor: nwse-resize;
-  background:
-    linear-gradient(135deg, transparent 33%, #d0d5dd 33%, #d0d5dd 40%, transparent 40%),
-    linear-gradient(135deg, transparent 50%, #d0d5dd 50%, #d0d5dd 57%, transparent 57%),
-    linear-gradient(135deg, transparent 67%, #d0d5dd 67%, #d0d5dd 74%, transparent 74%);
+  background: linear-gradient(135deg, transparent 33%, #d0d5dd 33%, #d0d5dd 40%, transparent 40%),
+              linear-gradient(135deg, transparent 50%, #d0d5dd 50%, #d0d5dd 57%, transparent 57%),
+              linear-gradient(135deg, transparent 67%, #d0d5dd 67%, #d0d5dd 74%, transparent 74%);
   user-select: none;
 }
 
-/* ── loading spinner ── */
+/* ── chat bubble ── */
+#ds-c-bubble {
+  position: fixed;
+  z-index: 2147483646;
+  display: none;
+  width: 380px;
+  min-width: 300px;
+  height: 440px;
+  min-height: 200px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  overflow: hidden;
+}
+#ds-c-bubble[style*="display: block"] {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.ds-c-header {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f5f7fa;
+  border-bottom: 1px solid #e8eaed;
+  cursor: move;
+  user-select: none;
+}
+.ds-c-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5f6368;
+  pointer-events: none;
+}
+.ds-c-close {
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.15s;
+}
+.ds-c-close:hover { color: #333; }
+
+.ds-c-context {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #5f6368;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e8eaed;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ds-c-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ds-msg {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.ds-msg-user {
+  align-self: flex-end;
+  background: #e3f2fd;
+  color: #1a1a1a;
+}
+.ds-msg-assistant {
+  align-self: flex-start;
+  background: #f1f3f4;
+  color: #1a1a1a;
+}
+
+.ds-c-input-row {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #e8eaed;
+  align-items: flex-end;
+}
+.ds-c-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  line-height: 1.4;
+}
+.ds-c-input:focus { border-color: #1a73e8; }
+.ds-c-send {
+  padding: 8px 16px;
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ds-c-send:hover { background: #1557b0; }
+
+.ds-c-resize {
+  flex-shrink: 0;
+  height: 12px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 33%, #d0d5dd 33%, #d0d5dd 40%, transparent 40%),
+              linear-gradient(135deg, transparent 50%, #d0d5dd 50%, #d0d5dd 57%, transparent 57%),
+              linear-gradient(135deg, transparent 67%, #d0d5dd 67%, #d0d5dd 74%, transparent 74%);
+  user-select: none;
+}
+
+/* ── spinner ── */
 .ds-spinner {
   width: 24px;
   height: 24px;
@@ -121,7 +260,4 @@
   border-radius: 50%;
   animation: ds-spin 0.7s linear infinite;
 }
-
-@keyframes ds-spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes ds-spin { to { transform: rotate(360deg); } }

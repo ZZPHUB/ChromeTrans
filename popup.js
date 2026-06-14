@@ -1,27 +1,27 @@
-const input = document.getElementById('apikey');
-const btn = document.getElementById('save');
-const status = document.getElementById('status');
+var input = document.getElementById('apikey');
+var btn = document.getElementById('save');
+var status = document.getElementById('status');
 
-chrome.storage.sync.get('apiKey', ({ apiKey }) => {
-  if (apiKey) input.value = apiKey;
+chrome.storage.sync.get('apiKey', function (data) {
+  if (data.apiKey) input.value = data.apiKey;
 });
 
-btn.addEventListener('click', async () => {
-  const apiKey = input.value.trim();
+btn.addEventListener('click', async function () {
+  var apiKey = input.value.trim();
   if (!apiKey) {
-    showStatus('请输入 API Key', 'error');
+    showStatus('Please enter an API Key', 'error');
     return;
   }
   if (!apiKey.startsWith('sk-')) {
-    showStatus('API Key 应以 sk- 开头', 'error');
+    showStatus('API Key should start with sk-', 'error');
     return;
   }
-  await chrome.storage.sync.set({ apiKey });
-  showStatus('已保存', 'success');
+  await chrome.storage.sync.set({ apiKey: apiKey });
+  showStatus('Saved', 'success');
 });
 
 function showStatus(msg, type) {
   status.textContent = msg;
   status.className = type;
-  setTimeout(() => { status.textContent = ''; status.className = ''; }, 2000);
+  setTimeout(function () { status.textContent = ''; status.className = ''; }, 2000);
 }
