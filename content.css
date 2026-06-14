@@ -1,0 +1,127 @@
+/* ── floating button ── */
+#ds-trans-btn {
+  position: fixed;
+  z-index: 2147483647;
+  display: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.35);
+  user-select: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  transform: scale(0.85);
+  opacity: 0;
+}
+
+#ds-trans-btn[style*="display: flex"] {
+  transform: scale(1);
+  opacity: 1;
+}
+
+#ds-trans-btn:hover {
+  background: #1557b0;
+  transform: scale(1.1);
+}
+
+/* ── translation bubble ── */
+#ds-trans-bubble {
+  position: fixed;
+  z-index: 2147483646;
+  display: none;
+  width: 320px;
+  min-width: 200px;
+  max-width: calc(100vw - 12px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  overflow: hidden;
+}
+
+#ds-trans-bubble[style*="display: block"] {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.ds-bubble-header {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f5f7fa;
+  border-bottom: 1px solid #e8eaed;
+  cursor: move;
+  user-select: none;
+}
+
+.ds-bubble-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5f6368;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+.ds-bubble-close {
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.15s;
+  pointer-events: auto;
+}
+
+.ds-bubble-close:hover {
+  color: #333;
+}
+
+.ds-bubble-result {
+  flex: 1 1 auto;
+  padding: 10px 14px 14px;
+  font-size: 15px;
+  color: #1a1a1a;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 40px;
+  overflow-y: auto;
+}
+
+/* ── resize handle ── */
+.ds-bubble-resize {
+  flex-shrink: 0;
+  height: 12px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 33%, #d0d5dd 33%, #d0d5dd 40%, transparent 40%),
+    linear-gradient(135deg, transparent 50%, #d0d5dd 50%, #d0d5dd 57%, transparent 57%),
+    linear-gradient(135deg, transparent 67%, #d0d5dd 67%, #d0d5dd 74%, transparent 74%);
+  user-select: none;
+}
+
+/* ── loading spinner ── */
+.ds-spinner {
+  width: 24px;
+  height: 24px;
+  margin: 8px auto;
+  border: 3px solid #e8eaed;
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+
+@keyframes ds-spin {
+  to { transform: rotate(360deg); }
+}
