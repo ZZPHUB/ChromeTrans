@@ -54,11 +54,19 @@
       if (text) {
         selectedText = text;
         var rect = sel.getRangeAt(0).getBoundingClientRect();
-        tBtn.style.left = (rect.right + 6) + 'px';
-        tBtn.style.top  = (rect.top + rect.height / 2 - 14) + 'px';
+        var btnY = Math.max(0, Math.min(rect.top + rect.height / 2 - 14, window.innerHeight - 28));
+
+        if (rect.right + 66 > window.innerWidth && rect.left > 66) {
+          cBtn.style.left = (rect.left - 34) + 'px';
+          tBtn.style.left = (rect.left - 66) + 'px';
+        } else {
+          tBtn.style.left = (rect.right + 6) + 'px';
+          cBtn.style.left = (rect.right + 38) + 'px';
+        }
+
+        tBtn.style.top  = btnY + 'px';
+        cBtn.style.top  = btnY + 'px';
         tBtn.style.display = 'flex';
-        cBtn.style.left = (rect.right + 38) + 'px';
-        cBtn.style.top  = (rect.top + rect.height / 2 - 14) + 'px';
         cBtn.style.display = 'flex';
       } else {
         tBtn.style.display = 'none';
