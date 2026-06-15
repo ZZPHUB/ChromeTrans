@@ -130,11 +130,13 @@
   cBtn.addEventListener('click', function () {
     closeBubble(tBubble);
 
-    var pars = extractPageParagraphs();
-    chatContext = pars.map(function (p) { return p.text; }).join('\n\n');
-    chatHistory = [];
-    cMessages.innerHTML = '';
-    cContext.textContent = 'Full page: ' + pars.length + ' paragraphs';
+    if (chatHistory.length === 0) {
+      var pars = extractPageParagraphs();
+      chatContext = pars.map(function (p) { return p.text; }).join('\n\n');
+      cMessages.innerHTML = '';
+      cContext.textContent = 'Full page: ' + pars.length + ' paragraphs';
+    }
+
     cInput.value = '';
 
     cBubble.style.width = '';
