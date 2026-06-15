@@ -64,9 +64,19 @@
   // ── selection detection ──
   document.addEventListener('mouseup', function (e) {
     if (isOurUI(e.target)) return;
+    var mx = e.clientX, my = e.clientY;
     setTimeout(function () {
       var sel = window.getSelection();
       selectedText = (sel && sel.toString().trim()) || '';
+      if (selectedText) {
+        var gRect = btnGroup.getBoundingClientRect();
+        var newRight = window.innerWidth - mx - gRect.width / 2;
+        var newBottom = window.innerHeight - my - gRect.height / 2;
+        newRight = Math.max(0, Math.min(newRight, window.innerWidth - gRect.width));
+        newBottom = Math.max(0, Math.min(newBottom, window.innerHeight - gRect.height));
+        btnGroup.style.right = newRight + 'px';
+        btnGroup.style.bottom = newBottom + 'px';
+      }
     }, 10);
   });
 
