@@ -78,11 +78,19 @@
     }
   }, true);
 
-  // ── click outside dismisses bubbles ──
+  // ── click outside: move button group + dismiss bubbles ──
   document.addEventListener('mousedown', function (e) {
     if (!isOurUI(e.target)) {
       tBubble.style.display = 'none';
       cBubble.style.display = 'none';
+
+      var gRect = btnGroup.getBoundingClientRect();
+      var newRight = window.innerWidth - e.clientX - gRect.width / 2;
+      var newBottom = window.innerHeight - e.clientY - gRect.height / 2;
+      newRight = Math.max(0, Math.min(newRight, window.innerWidth - gRect.width));
+      newBottom = Math.max(0, Math.min(newBottom, window.innerHeight - gRect.height));
+      btnGroup.style.right = newRight + 'px';
+      btnGroup.style.bottom = newBottom + 'px';
     }
   });
 
