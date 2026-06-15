@@ -322,16 +322,11 @@
     if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn')) return;
     e.preventDefault();
     var rect = btnGroup.getBoundingClientRect();
-    btnGroup.style.width = rect.width + 'px';
-    btnGroup.style.height = rect.height + 'px';
-    btnGroup.style.left = rect.left + 'px';
-    btnGroup.style.top = rect.top + 'px';
-    btnGroup.style.right = '';
-    btnGroup.style.bottom = '';
     dragState = {
       type: 'drag-group',
       startX: e.clientX, startY: e.clientY,
-      startLeft: rect.left, startTop: rect.top
+      startRight: window.innerWidth - rect.right,
+      startBottom: window.innerHeight - rect.bottom
     };
   });
 
@@ -364,8 +359,8 @@
       cBubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
       cBubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
     } else if (dragState.type === 'drag-group') {
-      btnGroup.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
-      btnGroup.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
+      btnGroup.style.right = (dragState.startRight - (e.clientX - dragState.startX)) + 'px';
+      btnGroup.style.bottom = (dragState.startBottom - (e.clientY - dragState.startY)) + 'px';
     } else if (dragState.type === 'resize-t') {
       var w = Math.max(200, dragState.startW + e.clientX - dragState.startX);
       var h = Math.max(80,  dragState.startH + e.clientY - dragState.startY);
