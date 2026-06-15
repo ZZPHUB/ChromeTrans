@@ -10,33 +10,33 @@
   var chatHistory = [];
   var pageParagraphs = [];
   var scrollTimer = null;
+  var translationCache = {};
 
-  // ── translate button (selection only) ──
+  // ── button group container ──
+  var btnGroup = document.createElement('div');
+  btnGroup.id = 'ds-btn-group';
+  document.body.appendChild(btnGroup);
+
+  // ── translate button ──
   var tBtn = document.createElement('div');
   tBtn.id = 'ds-t-btn';
   tBtn.textContent = 'T';
   tBtn.title = 'Translate';
-  document.body.appendChild(tBtn);
+  btnGroup.appendChild(tBtn);
 
-  // ── chat button (always visible) ──
+  // ── chat button ──
   var cBtn = document.createElement('div');
   cBtn.id = 'ds-c-btn';
   cBtn.textContent = 'C';
   cBtn.title = 'Chat';
-  cBtn.style.display = 'flex';
-  cBtn.style.right = '16px';
-  cBtn.style.bottom = '64px';
-  document.body.appendChild(cBtn);
+  btnGroup.appendChild(cBtn);
 
-  // ── full-translate button (always visible) ──
+  // ── full-translate button ──
   var ftBtn = document.createElement('div');
   ftBtn.id = 'ds-ft-btn';
   ftBtn.textContent = 'FT';
   ftBtn.title = 'Full Translate';
-  ftBtn.style.display = 'flex';
-  ftBtn.style.right = '16px';
-  ftBtn.style.bottom = '16px';
-  document.body.appendChild(ftBtn);
+  btnGroup.appendChild(ftBtn);
 
   // ── translate bubble ──
   var tBubble = document.createElement('div');
@@ -61,33 +61,17 @@
   var cHeader   = cBubble.querySelector('.ds-c-header');
   var cResize   = cBubble.querySelector('.ds-c-resize');
 
-  // ── selection detection (only T button) ──
+  // ── selection detection ──
   document.addEventListener('mouseup', function (e) {
     if (isOurUI(e.target)) return;
     setTimeout(function () {
       var sel = window.getSelection();
-      var text = (sel && sel.toString().trim()) || '';
-      if (text) {
-        selectedText = text;
-        var rect = sel.getRangeAt(0).getBoundingClientRect();
-        var btnY = Math.max(0, Math.min(rect.top + rect.height / 2 - 14, window.innerHeight - 28));
-
-        if (rect.right + 34 > window.innerWidth && rect.left > 34) {
-          tBtn.style.left = (rect.left - 34) + 'px';
-        } else {
-          tBtn.style.left = (rect.right + 6) + 'px';
-        }
-        tBtn.style.top = btnY + 'px';
-        tBtn.style.display = 'flex';
-      } else {
-        tBtn.style.display = 'none';
-      }
+      selectedText = (sel && sel.toString().trim()) || '';
     }, 10);
   });
 
-  // ── scroll hides only T button ──
+  // ── scroll triggers full-translate update ──
   document.addEventListener('scroll', function () {
-    tBtn.style.display = 'none';
     if (isFullTransActive) {
       if (scrollTimer) clearTimeout(scrollTimer);
       scrollTimer = setTimeout(translateVisibleBatch, 500);
@@ -101,10 +85,6 @@
       cBubble.style.display = 'none';
     }
   });
-
-  // ── prevent buttons from clearing selection ──
-  tBtn.addEventListener('mousedown', function (e) { e.stopPropagation(); e.preventDefault(); });
-  cBtn.addEventListener('mousedown', function (e) { e.stopPropagation(); e.preventDefault(); });
 
   // ── TRANSLATE button ──
   tBtn.addEventListener('click', async function () {
@@ -128,7 +108,6 @@
     if (by < 12) by = 12;
     tBubble.style.left = bx + 'px';
     tBubble.style.top  = by + 'px';
-    tBtn.style.display = 'none';
 
     try {
       var res = await chrome.runtime.sendMessage({ type: 'translate', text: selectedText });
@@ -142,7 +121,6 @@
   // ── CHAT button ──
   cBtn.addEventListener('click', function () {
     closeBubble(tBubble);
-    tBtn.style.display = 'none';
 
     var pars = extractPageParagraphs();
     chatContext = pars.map(function (p) { return p.text; }).join('\n\n');
@@ -181,7 +159,7 @@
     isFullTransActive = true;
     pageParagraphs = extractPageParagraphs();
     ftBtn.classList.add('ds-active');
-    ftBtn.title = 'Full Translate (active) — click to remove';
+    ftBtn.title = 'Full Translate (active)';
     translateVisibleBatch();
   }
 
@@ -201,33 +179,47 @@
     });
     if (visible.length === 0) return;
 
-    // show loading indicator
-    ftBtn.textContent = '...';
+    // split into cached vs uncached
+    var uncached = [];
+    for (var i = 0; i < visible.length; i++) {
+      var p = visible[i];
+      if (translationCache[p.text]) {
+        insertTranslation(p, translationCache[p.text]);
+      } else {
+        uncached.push(p);
+      }
+    }
 
+    if (uncached.length === 0) return;
+
+    ftBtn.textContent = '...';
     try {
       var res = await chrome.runtime.sendMessage({
         type: 'fullTranslate',
-        paragraphs: visible.map(function (p) { return p.text; })
+        paragraphs: uncached.map(function (p) { return p.text; })
       });
 
-      if (res.error) {
-        ftBtn.textContent = 'FT';
-        return;
-      }
+      if (res.error) { ftBtn.textContent = 'FT'; return; }
 
-      var trans = res.translations;
-      for (var i = 0; i < visible.length && i < trans.length; i++) {
-        if (!trans[i] || visible[i].el.dataset.dsTranslated) continue;
-        var transEl = document.createElement('div');
-        transEl.className = 'ds-translated';
-        transEl.textContent = trans[i];
-        visible[i].el.insertAdjacentElement('afterend', transEl);
-        visible[i].el.dataset.dsTranslated = '1';
+      for (var i = 0; i < uncached.length && i < res.translations.length; i++) {
+        var p = uncached[i];
+        var trans = res.translations[i];
+        if (!trans || p.el.dataset.dsTranslated) continue;
+        translationCache[p.text] = trans;
+        insertTranslation(p, trans);
       }
     } catch (err) {
       // ignore
     }
     ftBtn.textContent = 'FT';
+  }
+
+  function insertTranslation(paragraph, translation) {
+    var transEl = document.createElement('div');
+    transEl.className = 'ds-translated';
+    transEl.textContent = translation;
+    paragraph.el.insertAdjacentElement('afterend', transEl);
+    paragraph.el.dataset.dsTranslated = '1';
   }
 
   function removeAllTranslations() {
@@ -325,32 +317,17 @@
     };
   });
 
-  // ── drag (chat button) ──
-  cBtn.addEventListener('mousedown', function (e) {
+  // ── drag (button group) ──
+  btnGroup.addEventListener('mousedown', function (e) {
+    if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn')) return;
     e.preventDefault();
-    var rect = cBtn.getBoundingClientRect();
-    cBtn.style.left = rect.left + 'px';
-    cBtn.style.top = rect.top + 'px';
-    cBtn.style.right = '';
-    cBtn.style.bottom = '';
+    var rect = btnGroup.getBoundingClientRect();
+    btnGroup.style.left = rect.left + 'px';
+    btnGroup.style.top = rect.top + 'px';
+    btnGroup.style.right = '';
+    btnGroup.style.bottom = '';
     dragState = {
-      type: 'drag-c-btn',
-      startX: e.clientX, startY: e.clientY,
-      startLeft: rect.left, startTop: rect.top
-    };
-  });
-
-  // ── drag (full-translate button) ──
-  ftBtn.addEventListener('mousedown', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var rect = ftBtn.getBoundingClientRect();
-    ftBtn.style.left = rect.left + 'px';
-    ftBtn.style.top = rect.top + 'px';
-    ftBtn.style.right = '';
-    ftBtn.style.bottom = '';
-    dragState = {
-      type: 'drag-ft-btn',
+      type: 'drag-group',
       startX: e.clientX, startY: e.clientY,
       startLeft: rect.left, startTop: rect.top
     };
@@ -384,12 +361,9 @@
     } else if (dragState.type === 'drag-c') {
       cBubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
       cBubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
-    } else if (dragState.type === 'drag-c-btn') {
-      cBtn.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
-      cBtn.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
-    } else if (dragState.type === 'drag-ft-btn') {
-      ftBtn.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
-      ftBtn.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
+    } else if (dragState.type === 'drag-group') {
+      btnGroup.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
+      btnGroup.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
     } else if (dragState.type === 'resize-t') {
       var w = Math.max(200, dragState.startW + e.clientX - dragState.startX);
       var h = Math.max(80,  dragState.startH + e.clientY - dragState.startY);
@@ -431,7 +405,7 @@
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       if (el.offsetParent === null && el.tagName !== 'BODY') continue;
-      if (el.closest('#ds-t-bubble, #ds-c-bubble, #ds-t-btn, #ds-c-btn, #ds-ft-btn')) continue;
+      if (el.closest('#ds-t-bubble, #ds-c-bubble, #ds-btn-group')) continue;
 
       var contained = false;
       for (var j = 0; j < all.length; j++) {
@@ -454,7 +428,7 @@
 
   function isOurUI(el) {
     while (el) {
-      if (el === tBtn || el === cBtn || el === ftBtn || el === tBubble || el === cBubble) return true;
+      if (el === btnGroup || el === tBtn || el === cBtn || el === ftBtn || el === tBubble || el === cBubble) return true;
       el = el.parentElement;
     }
     return false;
@@ -463,12 +437,9 @@
   // ── font scale ──
   function applyFontScale(scale) {
     var pageFont = parseFloat(getComputedStyle(document.body).fontSize) || 16;
-    var size = pageFont * scale;
-    tBtn.style.fontSize = size + 'px';
-    cBtn.style.fontSize = size + 'px';
-    ftBtn.style.fontSize = size + 'px';
-    tBubble.style.fontSize = size + 'px';
-    cBubble.style.fontSize = size + 'px';
+    btnGroup.style.fontSize = (pageFont * scale) + 'px';
+    tBubble.style.fontSize = (pageFont * scale) + 'px';
+    cBubble.style.fontSize = (pageFont * scale) + 'px';
   }
 
   chrome.storage.sync.get('fontScale', function (data) {
