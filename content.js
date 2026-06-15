@@ -103,7 +103,12 @@
     isTranslating = true;
 
     var rect = tBtn.getBoundingClientRect();
-    tResult.innerHTML = '<div class="ds-spinner"></div>';
+
+    if (translationCache[selectedText]) {
+      tResult.textContent = translationCache[selectedText];
+    } else {
+      tResult.innerHTML = '<div class="ds-spinner"></div>';
+    }
 
     tBubble.style.width = '';
     tBubble.style.height = '';
@@ -119,11 +124,19 @@
     tBubble.style.left = bx + 'px';
     tBubble.style.top  = by + 'px';
 
-    try {
-      var res = await chrome.runtime.sendMessage({ type: 'translate', text: selectedText });
-      tResult.textContent = res.error || res.translation || '(empty)';
-    } catch (err) {
-      tResult.textContent = 'Request failed: ' + err.message;
+    if (!translationCache[selectedText]) {
+      try {
+        var res = await chrome.runtime.sendMessage({ type: 'translate', text: selectedText });
+        if (res.error) {
+          tResult.textContent = 'Error: ' + res.error;
+        } else {
+          var trans = res.translation || '(empty)';
+          translationCache[selectedText] = trans;
+          tResult.textContent = trans;
+        }
+      } catch (err) {
+        tResult.textContent = 'Request failed: ' + err.message;
+      }
     }
     isTranslating = false;
   });
