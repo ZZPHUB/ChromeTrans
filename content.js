@@ -321,12 +321,10 @@
   btnGroup.addEventListener('mousedown', function (e) {
     if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn')) return;
     e.preventDefault();
-    var cs = getComputedStyle(btnGroup);
     dragState = {
       type: 'drag-group',
       startX: e.clientX, startY: e.clientY,
-      startRight: parseFloat(cs.right) || 0,
-      startBottom: parseFloat(cs.bottom) || 0
+      offsetX: 0, offsetY: 0
     };
   });
 
@@ -359,8 +357,11 @@
       cBubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
       cBubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
     } else if (dragState.type === 'drag-group') {
-      btnGroup.style.right = (dragState.startRight - (e.clientX - dragState.startX)) + 'px';
-      btnGroup.style.bottom = (dragState.startBottom - (e.clientY - dragState.startY)) + 'px';
+      var dx = e.clientX - dragState.startX;
+      var dy = e.clientY - dragState.startY;
+      dragState.offsetX = dx;
+      dragState.offsetY = dy;
+      btnGroup.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
     } else if (dragState.type === 'resize-t') {
       var w = Math.max(200, dragState.startW + e.clientX - dragState.startX);
       var h = Math.max(80,  dragState.startH + e.clientY - dragState.startY);
@@ -375,6 +376,12 @@
   });
 
   document.addEventListener('mouseup', function () {
+    if (dragState && dragState.type === 'drag-group') {
+      var rect = btnGroup.getBoundingClientRect();
+      btnGroup.style.right = (window.innerWidth - rect.right) + 'px';
+      btnGroup.style.bottom = (window.innerHeight - rect.bottom) + 'px';
+      btnGroup.style.transform = '';
+    }
     dragState = null;
   });
 
