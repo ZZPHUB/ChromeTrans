@@ -321,12 +321,12 @@
   btnGroup.addEventListener('mousedown', function (e) {
     if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn')) return;
     e.preventDefault();
-    var rect = btnGroup.getBoundingClientRect();
+    var cs = getComputedStyle(btnGroup);
     dragState = {
       type: 'drag-group',
       startX: e.clientX, startY: e.clientY,
-      startRight: window.innerWidth - rect.right,
-      startBottom: window.innerHeight - rect.bottom
+      startRight: parseFloat(cs.right) || 0,
+      startBottom: parseFloat(cs.bottom) || 0
     };
   });
 
