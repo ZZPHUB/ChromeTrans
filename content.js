@@ -322,6 +322,8 @@
     if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn')) return;
     e.preventDefault();
     var rect = btnGroup.getBoundingClientRect();
+    btnGroup.style.width = rect.width + 'px';
+    btnGroup.style.height = rect.height + 'px';
     btnGroup.style.left = rect.left + 'px';
     btnGroup.style.top = rect.top + 'px';
     btnGroup.style.right = '';
