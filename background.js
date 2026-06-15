@@ -1,5 +1,8 @@
 var SYSTEM_TRANSLATE = 'You are an English-to-Chinese translator. Output only the translation. No explanations, no notes, no extra text.';
 var SYSTEM_CHAT = 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.';
+var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate each paragraph below. Paragraphs are separated by "===PARA_SEP===". Output translations separated by "===PARA_SEP===", same order and count. Do not add or remove paragraphs. Output only translations, no extra text.';
+
+var FULL_PARAGRAPH_SEPARATOR = '\n\n===PARA_SEP===\n\n';
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type === 'translate') {
@@ -8,6 +11,10 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
   if (msg.type === 'chat') {
     handleChat(msg, sendResponse);
+    return true;
+  }
+  if (msg.type === 'fullTranslate') {
+    handleFullTranslate(msg, sendResponse);
     return true;
   }
 });
@@ -34,6 +41,31 @@ async function handleChat(msg, sendResponse) {
   try {
     var result = await callDeepSeek(msg.messages, apiKey);
     sendResponse({ reply: result });
+  } catch (err) {
+    sendResponse({ error: err.message });
+  }
+}
+
+async function handleFullTranslate(msg, sendResponse) {
+  var apiKey = await getApiKey(sendResponse);
+  if (!apiKey) return;
+
+  var paragraphs = msg.paragraphs || [];
+  if (paragraphs.length === 0) {
+    sendResponse({ translations: [] });
+    return;
+  }
+
+  var input = paragraphs.join(FULL_PARAGRAPH_SEPARATOR);
+
+  try {
+    var result = await callDeepSeek([
+      { role: 'system', content: SYSTEM_FULL_TRANSLATE },
+      { role: 'user', content: input }
+    ], apiKey);
+
+    var translations = result.split(FULL_PARAGRAPH_SEPARATOR).map(function (t) { return t.trim(); });
+    sendResponse({ translations: translations });
   } catch (err) {
     sendResponse({ error: err.message });
   }

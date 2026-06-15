@@ -1,4 +1,4 @@
-/* ── translate button ── */
+/* ── translate button (selection-only) ── */
 #ds-t-btn {
   position: fixed;
   z-index: 2147483647;
@@ -23,11 +23,10 @@
 #ds-t-btn[style*="display: flex"] { transform: scale(1); opacity: 1; }
 #ds-t-btn:hover { background: #1557b0; transform: scale(1.1); }
 
-/* ── chat button ── */
+/* ── chat button (always visible) ── */
 #ds-c-btn {
   position: fixed;
   z-index: 2147483647;
-  display: none;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -41,12 +40,31 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(13,148,136,0.35);
   user-select: none;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-  transform: scale(0.85);
-  opacity: 0;
+  transition: transform 0.15s ease;
 }
-#ds-c-btn[style*="display: flex"] { transform: scale(1); opacity: 1; }
 #ds-c-btn:hover { background: #0f766e; transform: scale(1.1); }
+
+/* ── full-translate button (always visible) ── */
+#ds-ft-btn {
+  position: fixed;
+  z-index: 2147483647;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e67e22;
+  color: #fff;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75em;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(230,126,34,0.35);
+  user-select: none;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+#ds-ft-btn:hover { background: #d35400; transform: scale(1.1); }
+#ds-ft-btn.ds-active { background: #c0392b; }
 
 /* ── translate bubble ── */
 #ds-t-bubble {
@@ -56,6 +74,7 @@
   width: 320px;
   min-width: 200px;
   max-width: calc(100vw - 12px);
+  max-height: 70vh;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.18);
@@ -331,6 +350,18 @@
 .ds-msg-assistant th { background: #f5f7fa; font-weight: 600; }
 
 .ds-msg-assistant img { max-width: 100%; border-radius: 4px; }
+
+/* ── inline-inserted translation paragraphs ── */
+.ds-translated {
+  margin: 4px 0 16px 0;
+  padding: 8px 12px;
+  border-left: 3px solid #e67e22;
+  background: rgba(230,126,34,0.05);
+  color: #5f6368;
+  font-style: italic;
+  line-height: 1.6;
+  word-break: break-word;
+}
 
 /* ── spinner ── */
 .ds-spinner {
