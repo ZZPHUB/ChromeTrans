@@ -483,21 +483,22 @@
 /* ── inline-inserted translation pairs ── */
 .ds-trans-pair {
   margin: 10px 0;
-  padding: 10px 14px;
-  border-left: 3px solid #e67e22;
-  background: rgba(230,126,34,0.04);
-  border-radius: 0 6px 6px 0;
+  border: 1px solid #e0e3e8;
+  border-radius: 8px;
+  overflow: hidden;
   line-height: 1.6;
 }
 .ds-trans-pair [data-ds-translated] {
-  color: #888;
+  padding: 10px 14px;
+  background: #f6f8fa;
+  color: #57606a;
+  margin: 0;
 }
 .ds-trans-pair .ds-translated {
-  margin-top: 9px;
-  padding-top: 9px;
-  border-top: 1px dashed rgba(230,126,34,0.25);
+  padding: 10px 14px;
+  background: #eff6ff;
   color: #1a1a1a;
-  font-style: normal;
+  border-top: 1px solid #dae2ed;
   word-break: break-word;
 }
 
