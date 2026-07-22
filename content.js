@@ -273,19 +273,22 @@
     var CHUNK = 20;
     for (var chunkStart = 0; chunkStart < uncached.length; chunkStart += CHUNK) {
       var chunk = uncached.slice(chunkStart, Math.min(chunkStart + CHUNK, uncached.length));
-      // build request for this chunk
+      // build request for this chunk with distinctive markers
+      var MARKER_PREFIX = '<<<SEG_';
+      var MARKER_SUFFIX = '>>>';
       var parts = [];
       for (var i = 0; i < chunk.length; i++) {
-        parts.push('[SEG_' + i + ']\n' + chunk[i].text);
+        parts.push(MARKER_PREFIX + i + MARKER_SUFFIX + '\n' + chunk[i].text);
       }
       try {
         var res = await chrome.runtime.sendMessage({
           type: 'fullTranslate',
           text: parts.join('\n\n'),
-          count: chunk.length
+          count: chunk.length,
+          marker: MARKER_PREFIX + 'N' + MARKER_SUFFIX
         });
         // parse and apply translations
-        var translations = parseSegments(res.translation || '', chunk.length);
+        var translations = parseSegments(res.translation || '', chunk.length, MARKER_PREFIX, MARKER_SUFFIX);
         for (var i = 0; i < chunk.length; i++) {
           var p = chunk[i];
           if (p.el.dataset.dsTranslated) continue;
@@ -540,16 +543,18 @@
     return result;
   }
 
-  function parseSegments(raw, count) {
+  function parseSegments(raw, count, prefix, suffix) {
+    prefix = prefix || '<<<SEG_';
+    suffix = suffix || '>>>';
     var result = [];
     for (var i = 0; i < count; i++) {
-      var marker = '[SEG_' + i + ']';
+      var marker = prefix + i + suffix;
       var start = raw.indexOf(marker);
       if (start === -1) { result.push(''); continue; }
       start += marker.length;
       var end = raw.length;
       for (var j = i + 1; j < count; j++) {
-        var pos = raw.indexOf('[SEG_' + j + ']', start);
+        var pos = raw.indexOf(prefix + j + suffix, start);
         if (pos !== -1) { end = pos; break; }
       }
       result.push(raw.substring(start, end).trim());
