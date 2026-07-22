@@ -158,15 +158,24 @@
 
 .ds-t-resize {
   flex-shrink: 0;
-  height: 8px;
+  height: 12px;
   cursor: nwse-resize;
-  background: transparent;
-  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   user-select: none;
 }
-.ds-t-resize:hover {
-  background: linear-gradient(135deg, transparent 40%, #c8ccd0 40%, #c8ccd0 48%, transparent 48%),
-              linear-gradient(135deg, transparent 60%, #c8ccd0 60%, #c8ccd0 68%, transparent 68%);
+.ds-t-resize::after {
+  content: '';
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0,0,0,0.08);
+  transition: background 0.2s, width 0.2s;
+}
+.ds-t-resize:hover::after {
+  background: rgba(0,0,0,0.15);
+  width: 40px;
 }
 
 /* ── chat bubble ── */
@@ -335,15 +344,24 @@
 
 .ds-c-resize {
   flex-shrink: 0;
-  height: 8px;
+  height: 12px;
   cursor: nwse-resize;
-  background: transparent;
-  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   user-select: none;
 }
-.ds-c-resize:hover {
-  background: linear-gradient(135deg, transparent 40%, #c8ccd0 40%, #c8ccd0 48%, transparent 48%),
-              linear-gradient(135deg, transparent 60%, #c8ccd0 60%, #c8ccd0 68%, transparent 68%);
+.ds-c-resize::after {
+  content: '';
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0,0,0,0.08);
+  transition: background 0.2s, width 0.2s;
+}
+.ds-c-resize:hover::after {
+  background: rgba(0,0,0,0.15);
+  width: 40px;
 }
 
 /* ── bubble open animation ── */
