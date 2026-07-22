@@ -6,10 +6,11 @@ Select text on any webpage to **translate**, **chat**, or **full-page translate*
 
 | Feature | Description |
 |---|---|
-| **Translate (T)** | One-shot English-to-Chinese translation in a draggable/resizable bubble. Result is cached — reopen shows it instantly without re-calling the API. |
-| **Chat (C)** | Multi-turn conversation with DeepSeek about the full page content. Markdown rendering for code blocks, lists, tables, and more. Conversation history is preserved across close/reopen. |
-| **Full Translate (FT)** | Toggle full-page translation. Translates visible paragraphs on-demand and inserts them inline below each original. Scrolls auto-translate new paragraphs. Translation results are cached across toggles. |
-| **Button group** | T, C, FT are unified in a single draggable panel at the bottom-right. The group snaps to your mouse position after you select text. |
+| **Translate** 🌐 | One-shot English-to-Chinese translation in a draggable/resizable bubble. Result is cached — reopen shows it instantly without re-calling the API. Bubble appears near the selected text. |
+| **Chat** 💬 | Multi-turn conversation with DeepSeek about the full page content. Markdown rendering for code blocks, lists, tables, and more. Conversation history is preserved across close/reopen. Bubble opens centered in the viewport. |
+| **Full Translate** 📄 | Toggle full-page translation. Translates visible paragraphs on-demand and inserts them inline below each original. Scrolls auto-translate new paragraphs. Translation results are cached across toggles. Code blocks (`<pre>`, `<code>`, `<kbd>`, `<samp>`, `<var>`) and elements with `translate="no"` / `.notranslate` are automatically excluded. |
+| **Pin** 📌 | Lock the button group in place. When pinned, the group won't move with text selection or dragging. Unpin to restore normal behavior. |
+| **Button group** | Four icon buttons (🌐 💬 📄 📌) in a single draggable panel at the bottom-right. The group snaps to your mouse position after you select text. Activated buttons pulse with a colored glow. |
 | **Font scale** | Slider in the popup (0.5x – 2.0x) scales all UI relative to the current page's base font size. |
 | **Bubble controls** | Both translate and chat bubbles are draggable (by the title bar) and resizable (by the bottom-right handle). |
 
@@ -26,10 +27,11 @@ Select text on any webpage to **translate**, **chat**, or **full-page translate*
 |---|---|
 | Set API Key | Click extension icon → paste `sk-...` → Save |
 | Adjust font size | Click extension icon → drag the **Font Scale** slider |
-| Translate selected text | Select text → click blue **T** button in the group |
-| Chat about the page | Click teal **C** button → type questions → Enter or Send |
-| Full-page translate | Click orange **FT** button → toggle on/off |
-| Move the button group | Drag the gap between buttons, or select text to snap it to your mouse position |
+| Translate selected text | Select text → click blue **T** (🌐) button — bubble appears near selection |
+| Chat about the page | Click teal **C** (💬) button → bubble opens centered → type questions → Enter or Send |
+| Full-page translate | Click orange **FT** (📄) button → toggle on/off |
+| Lock button position | Click gray **P** (📌) button → turns pink to indicate pinned |
+| Move the button group | Drag the gap between buttons, or select text to snap it to your mouse position (only when unpinned) |
 
 ## Project Structure
 
