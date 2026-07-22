@@ -270,32 +270,20 @@
     if (uncached.length === 0) return;
 
     ftBtn.classList.add('ds-loading');
-    // fire parallel batches of individual translations
-    var PARALLEL = 5;
-    for (var batchStart = 0; batchStart < uncached.length; batchStart += PARALLEL) {
-      var batch = uncached.slice(batchStart, Math.min(batchStart + PARALLEL, uncached.length));
-      // launch all requests in this batch in parallel
-      var promises = batch.map(function (p) {
-        return chrome.runtime.sendMessage({
+    for (var i = 0; i < uncached.length; i++) {
+      var p = uncached[i];
+      if (p.el.dataset.dsTranslated) continue;
+      try {
+        var res = await chrome.runtime.sendMessage({
           type: 'fullTranslate',
           text: p.text
-        }).then(function (res) {
-          return { p: p, res: res };
-        }).catch(function () {
-          return { p: p, res: null };
         });
-      });
-      var results = await Promise.all(promises);
-      for (var i = 0; i < results.length; i++) {
-        var r = results[i];
-        if (!r || !r.res) continue;
-        var p = r.p;
-        if (p.el.dataset.dsTranslated) continue;
-        var trans = r.res.translation;
-        if (trans) {
-          translationCache[p.text] = trans;
-          insertTranslation(p, trans);
+        if (res && res.translation) {
+          translationCache[p.text] = res.translation;
+          insertTranslation(p, res.translation);
         }
+      } catch (err) {
+        // continue
       }
     }
     ftBtn.classList.remove('ds-loading');
