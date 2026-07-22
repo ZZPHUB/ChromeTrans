@@ -291,10 +291,7 @@
         var trans = translations[i];
         if (trans) {
           translationCache[p.text] = trans;
-          if (trans !== p.text) {
-            // only insert if actually translated (code kept as-is by DeepSeek)
-            insertTranslation(p, trans);
-          }
+          insertTranslation(p, trans);
         }
       }
     } catch (err) {
@@ -523,8 +520,9 @@
       var el = all[i];
       if (el.offsetParent === null && el.tagName !== 'BODY') continue;
       if (el.closest('#ds-t-bubble, #ds-c-bubble, #ds-btn-group')) continue;
-      // only skip explicit code blocks and opt-out elements
+      // skip code elements and paragraphs containing code
       if (SKIP_TAGS[el.tagName]) continue;
+      if (el.querySelector && (el.querySelector('pre') || el.querySelector('code'))) continue;
       if (el.getAttribute && el.getAttribute('translate') === 'no') continue;
 
       var contained = false;
