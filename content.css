@@ -18,7 +18,8 @@
 /* ── all action buttons (shared) ── */
 #ds-t-btn,
 #ds-c-btn,
-#ds-ft-btn {
+#ds-ft-btn,
+#ds-pin-btn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -58,6 +59,21 @@
 #ds-ft-btn:hover { background: #d35400; transform: scale(1.1); }
 #ds-ft-btn:active { transform: scale(0.95); }
 #ds-ft-btn.ds-active { background: #c0392b; }
+
+/* ── pin button ── */
+#ds-pin-btn {
+  background: #9e9e9e;
+  font-size: 0.7em;
+}
+#ds-pin-btn:hover { background: #757575; transform: scale(1.1); }
+#ds-pin-btn:active { transform: scale(0.95); }
+#ds-pin-btn.ds-pinned { background: #c62828; }
+#ds-pin-btn.ds-pinned:hover { background: #b71c1c; }
+
+/* ── button group pinned state ── */
+#ds-btn-group.ds-pinned {
+  box-shadow: 0 2px 14px rgba(198, 40, 40, 0.25);
+}
 
 /* ── translate bubble ── */
 #ds-t-bubble {

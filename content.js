@@ -5,6 +5,7 @@
   var isTranslating = false;
   var isChatting = false;
   var isFullTransActive = false;
+  var isPinned = false;
   var dragState = null;
   var chatContext = '';
   var chatHistory = [];
@@ -38,6 +39,13 @@
   ftBtn.title = 'Full Translate';
   btnGroup.appendChild(ftBtn);
 
+  // ── pin button ──
+  var pinBtn = document.createElement('div');
+  pinBtn.id = 'ds-pin-btn';
+  pinBtn.textContent = 'P';
+  pinBtn.title = 'Pin';
+  btnGroup.appendChild(pinBtn);
+
   // ── translate bubble ──
   var tBubble = document.createElement('div');
   tBubble.id = 'ds-t-bubble';
@@ -68,7 +76,7 @@
     setTimeout(function () {
       var sel = window.getSelection();
       selectedText = (sel && sel.toString().trim()) || '';
-      if (selectedText) {
+      if (selectedText && !isPinned) {
         var gRect = btnGroup.getBoundingClientRect();
         var newRight = window.innerWidth - mx - gRect.width / 2;
         var newBottom = window.innerHeight - my - gRect.height / 2;
@@ -169,6 +177,21 @@
     cBubble.style.top  = by + 'px';
 
     cInput.focus();
+  });
+
+  // ── PIN button ──
+  pinBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    isPinned = !isPinned;
+    if (isPinned) {
+      pinBtn.classList.add('ds-pinned');
+      pinBtn.title = 'Unpin';
+      btnGroup.classList.add('ds-pinned');
+    } else {
+      pinBtn.classList.remove('ds-pinned');
+      pinBtn.title = 'Pin';
+      btnGroup.classList.remove('ds-pinned');
+    }
   });
 
   // ── FULL TRANSLATE button ──
@@ -344,7 +367,8 @@
 
   // ── drag (button group) ──
   btnGroup.addEventListener('mousedown', function (e) {
-    if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn')) return;
+    if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn, #ds-pin-btn')) return;
+    if (isPinned) return;
     e.preventDefault();
     dragState = {
       type: 'drag-group',
