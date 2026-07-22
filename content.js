@@ -270,32 +270,34 @@
     if (uncached.length === 0) return;
 
     ftBtn.classList.add('ds-loading');
-    // build one request for all uncached paragraphs with numbered markers
-    var parts = [];
-    for (var i = 0; i < uncached.length; i++) {
-      parts.push('[SEG_' + i + ']\n' + uncached[i].text);
-    }
-    var fullText = parts.join('\n\n');
-
-    try {
-      var res = await chrome.runtime.sendMessage({
-        type: 'fullTranslate',
-        text: fullText,
-        count: uncached.length
-      });
-      // parse translations by marker and apply
-      var translations = parseSegments(res.translation || '', uncached.length);
-      for (var i = 0; i < uncached.length; i++) {
-        var p = uncached[i];
-        if (p.el.dataset.dsTranslated) continue;
-        var trans = translations[i];
-        if (trans) {
-          translationCache[p.text] = trans;
-          insertTranslation(p, trans);
-        }
+    var CHUNK = 30;
+    for (var chunkStart = 0; chunkStart < uncached.length; chunkStart += CHUNK) {
+      var chunk = uncached.slice(chunkStart, Math.min(chunkStart + CHUNK, uncached.length));
+      // build request for this chunk
+      var parts = [];
+      for (var i = 0; i < chunk.length; i++) {
+        parts.push('[SEG_' + i + ']\n' + chunk[i].text);
       }
-    } catch (err) {
-      // ignore
+      try {
+        var res = await chrome.runtime.sendMessage({
+          type: 'fullTranslate',
+          text: parts.join('\n\n'),
+          count: chunk.length
+        });
+        // parse and apply translations
+        var translations = parseSegments(res.translation || '', chunk.length);
+        for (var i = 0; i < chunk.length; i++) {
+          var p = chunk[i];
+          if (p.el.dataset.dsTranslated) continue;
+          var trans = translations[i];
+          if (trans) {
+            translationCache[p.text] = trans;
+            insertTranslation(p, trans);
+          }
+        }
+      } catch (err) {
+        // continue to next chunk
+      }
     }
     ftBtn.classList.remove('ds-loading');
   }
@@ -510,7 +512,6 @@
 
   // ── helpers ──
   var SKIP_TAGS = { PRE: 1, CODE: 1 };
-  var MIN_TEXT_LENGTH = 4;
 
   function extractPageParagraphs() {
     var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, dt, dd, td, th, summary, caption, a, label';
@@ -532,7 +533,7 @@
       if (contained) continue;
 
       var text = el.textContent.trim();
-      if (text.length > MIN_TEXT_LENGTH) {
+      if (text) {
         result.push({ el: el, text: text });
       }
     }
