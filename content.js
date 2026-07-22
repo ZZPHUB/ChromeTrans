@@ -115,7 +115,7 @@
   document.addEventListener('scroll', function () {
     if (isFullTransActive) {
       if (scrollTimer) clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(translateVisibleBatch, 500);
+      scrollTimer = setTimeout(translateAllParagraphs, 500);
     }
   }, true);
 
@@ -237,7 +237,7 @@
     pageParagraphs = extractPageParagraphs();
     ftBtn.classList.add('ds-active');
     ftBtn.title = 'Full Translate (active)';
-    translateVisibleBatch();
+    translateAllParagraphs();
   }
 
   function deactivateFullTranslate() {
@@ -249,17 +249,17 @@
     if (scrollTimer) clearTimeout(scrollTimer);
   }
 
-  async function translateVisibleBatch() {
+  async function translateAllParagraphs() {
     if (!isFullTransActive) return;
-    var visible = pageParagraphs.filter(function (p) {
-      return isInViewport(p.el) && !p.el.dataset.dsTranslated;
+    var pending = pageParagraphs.filter(function (p) {
+      return !p.el.dataset.dsTranslated;
     });
-    if (visible.length === 0) return;
+    if (pending.length === 0) return;
 
     // split into cached vs uncached
     var uncached = [];
-    for (var i = 0; i < visible.length; i++) {
-      var p = visible[i];
+    for (var i = 0; i < pending.length; i++) {
+      var p = pending[i];
       if (translationCache[p.text]) {
         insertTranslation(p, translationCache[p.text]);
       } else {
@@ -556,11 +556,6 @@
     var nonProse = text.match(/[^\p{L}\p{N}\s.,;:!?()\-—""''一-鿿㐀-䶿]/gu) || [];
     if (nonProse.length / text.length > 0.5) return false;
     return true;
-  }
-
-  function isInViewport(el) {
-    var rect = el.getBoundingClientRect();
-    return rect.top < window.innerHeight && rect.bottom > 0;
   }
 
   function isOurUI(el) {
