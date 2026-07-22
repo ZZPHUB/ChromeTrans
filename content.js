@@ -464,7 +464,10 @@
   }
 
   // ── helpers ──
-  var SKIP_TRANSLATE_TAGS = { PRE: 1, CODE: 1, KBD: 1, SAMP: 1, VAR: 1 };
+  var SKIP_TAGS = { PRE: 1, CODE: 1, KBD: 1, SAMP: 1, VAR: 1 };
+  var SKIP_ANCESTOR_TAGS = { NAV: 1, HEADER: 1, FOOTER: 1, ASIDE: 1, MENU: 1, BUTTON: 1, SELECT: 1, TIME: 1, DETAILS: 1, SUMMARY: 1 };
+  var SKIP_CLASS_PATTERNS = /nav|menu|sidebar|footer|banner|breadcrumb|pagination|meta|label|badge|button|btn|mono|commit|sha|hash|timestamp|blob-code|line-number|signature|avatar/i;
+  var MIN_TEXT_LENGTH = 8;
 
   function extractPageParagraphs() {
     var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption';
@@ -483,7 +486,7 @@
       if (contained) continue;
 
       var text = el.textContent.trim();
-      if (text.length > 3) {
+      if (text.length >= MIN_TEXT_LENGTH && isProseContent(text)) {
         result.push({ el: el, text: text });
       }
     }
@@ -491,15 +494,40 @@
   }
 
   function shouldSkipTranslate(el) {
-    // check self and ancestors for translate="no" or notranslate class
     var cur = el;
     while (cur && cur !== document.body) {
+      // explicit opt-out
       if (cur.getAttribute && cur.getAttribute('translate') === 'no') return true;
       if (cur.classList && cur.classList.contains('notranslate')) return true;
-      if (SKIP_TRANSLATE_TAGS[cur.tagName]) return true;
+      // code-related tags
+      if (SKIP_TAGS[cur.tagName]) return true;
+      // semantic non-content ancestors
+      if (SKIP_ANCESTOR_TAGS[cur.tagName]) return true;
+      // class-based exclusion
+      if (cur.classList && matchesSkipClass(cur.classList)) return true;
       cur = cur.parentElement;
     }
     return false;
+  }
+
+  function matchesSkipClass(classList) {
+    for (var i = 0; i < classList.length; i++) {
+      if (SKIP_CLASS_PATTERNS.test(classList[i])) return true;
+    }
+    return false;
+  }
+
+  function isProseContent(text) {
+    // skip if more than 40% of characters are non-alphabetic/non-CJK symbols
+    var alphaCJK = text.match(/[\p{L}\p{N}\s.,;:!?()\-—""''一-鿿㐀-䶿]/gu) || [];
+    var ratio = alphaCJK.length / text.length;
+    if (ratio < 0.6) return false;
+    // skip if it looks like a short UI label (no sentence structure)
+    if (text.length < 20 && text.indexOf('.') === -1 && text.indexOf('。') === -1 && text.indexOf('，') === -1) {
+      var words = text.split(/\s+/);
+      if (words.length <= 3) return false;
+    }
+    return true;
   }
 
   function isInViewport(el) {
