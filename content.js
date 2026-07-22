@@ -2,6 +2,7 @@
   'use strict';
 
   var selectedText = '';
+  var selectedRect = null;
   var isTranslating = false;
   var isChatting = false;
   var isFullTransActive = false;
@@ -76,6 +77,11 @@
     setTimeout(function () {
       var sel = window.getSelection();
       selectedText = (sel && sel.toString().trim()) || '';
+      if (selectedText) {
+        try { selectedRect = sel.getRangeAt(0).getBoundingClientRect(); } catch (e) { selectedRect = null; }
+      } else {
+        selectedRect = null;
+      }
       if (selectedText && !isPinned) {
         var gRect = btnGroup.getBoundingClientRect();
         var newRight = window.innerWidth - mx - gRect.width / 2;
@@ -111,7 +117,7 @@
     isTranslating = true;
 
     // position bubble near the selected text
-    var selRect = getSelectionRect();
+    var selRect = selectedRect;
 
     if (translationCache[selectedText]) {
       tResult.textContent = translationCache[selectedText];
@@ -493,17 +499,6 @@
       el = el.parentElement;
     }
     return false;
-  }
-
-  function getSelectionRect() {
-    var sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
-    try {
-      var range = sel.getRangeAt(0);
-      return range.getBoundingClientRect();
-    } catch (e) {
-      return null;
-    }
   }
 
   // ── font scale ──
