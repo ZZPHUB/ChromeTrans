@@ -7,7 +7,7 @@
   var isChatting = false;
   var isFullTransActive = false;
   var isPinned = false;
-  var layoutMode = 0; // 0=1x4 vertical, 1=4x1 horizontal, 2=2x2 grid
+  var layoutMode = 2; // 0=1x4 vertical, 1=4x1 horizontal, 2=2x2 grid (default)
   var dragState = null;
   var chatContext = '';
   var chatHistory = [];
@@ -18,6 +18,7 @@
   // ── button group container ──
   var btnGroup = document.createElement('div');
   btnGroup.id = 'ds-btn-group';
+  btnGroup.classList.add('ds-layout-grid');
   document.body.appendChild(btnGroup);
 
   // ── translate button ──
