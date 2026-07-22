@@ -465,14 +465,17 @@
   }
 
   // ── helpers ──
+  var SKIP_TRANSLATE_TAGS = { PRE: 1, CODE: 1, KBD: 1, SAMP: 1, VAR: 1 };
+
   function extractPageParagraphs() {
-    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, figcaption';
+    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption';
     var all = document.querySelectorAll(selectors);
     var result = [];
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       if (el.offsetParent === null && el.tagName !== 'BODY') continue;
       if (el.closest('#ds-t-bubble, #ds-c-bubble, #ds-btn-group')) continue;
+      if (shouldSkipTranslate(el)) continue;
 
       var contained = false;
       for (var j = 0; j < all.length; j++) {
@@ -486,6 +489,18 @@
       }
     }
     return result;
+  }
+
+  function shouldSkipTranslate(el) {
+    // check self and ancestors for translate="no" or notranslate class
+    var cur = el;
+    while (cur && cur !== document.body) {
+      if (cur.getAttribute && cur.getAttribute('translate') === 'no') return true;
+      if (cur.classList && cur.classList.contains('notranslate')) return true;
+      if (SKIP_TRANSLATE_TAGS[cur.tagName]) return true;
+      cur = cur.parentElement;
+    }
+    return false;
   }
 
   function isInViewport(el) {
