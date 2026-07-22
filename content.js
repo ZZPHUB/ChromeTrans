@@ -110,7 +110,8 @@
     closeBubble(cBubble);
     isTranslating = true;
 
-    var rect = tBtn.getBoundingClientRect();
+    // position bubble near the selected text
+    var selRect = getSelectionRect();
 
     if (translationCache[selectedText]) {
       tResult.textContent = translationCache[selectedText];
@@ -124,11 +125,17 @@
     tBtn.classList.add('ds-active');
     var bw = 320;
     var bh = tBubble.offsetHeight;
-    var bx = rect.right + 8;
-    var by = rect.bottom + 4;
-    if (bx + bw > window.innerWidth) bx = window.innerWidth - bw - 12;
+    var bx, by;
+    if (selRect) {
+      bx = selRect.left + selRect.width / 2 - bw / 2;
+      by = selRect.bottom + 8;
+    } else {
+      bx = window.innerWidth - bw - 20;
+      by = 20;
+    }
     if (bx < 12) bx = 12;
-    if (by + bh > window.innerHeight) by = rect.top - bh - 4;
+    if (bx + bw > window.innerWidth) bx = window.innerWidth - bw - 12;
+    if (by + bh > window.innerHeight) by = selRect ? selRect.top - bh - 8 : window.innerHeight - bh - 20;
     if (by < 12) by = 12;
     tBubble.style.left = bx + 'px';
     tBubble.style.top  = by + 'px';
@@ -168,13 +175,10 @@
     cBubble.style.display = 'block';
     cBtn.classList.add('ds-active');
 
-    var rect = cBtn.getBoundingClientRect();
-    var bx = rect.right + 8;
-    var by = rect.bottom + 4;
-    if (bx + 380 > window.innerWidth) bx = window.innerWidth - 380 - 12;
-    if (bx < 12) bx = 12;
-    if (by + 440 > window.innerHeight) by = rect.top - 440 - 4;
-    if (by < 12) by = 12;
+    var cw = 380;
+    var ch = 440;
+    var bx = Math.max(12, (window.innerWidth - cw) / 2);
+    var by = Math.max(12, (window.innerHeight - ch) / 2);
     cBubble.style.left = bx + 'px';
     cBubble.style.top  = by + 'px';
 
@@ -489,6 +493,17 @@
       el = el.parentElement;
     }
     return false;
+  }
+
+  function getSelectionRect() {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    try {
+      var range = sel.getRangeAt(0);
+      return range.getBoundingClientRect();
+    } catch (e) {
+      return null;
+    }
   }
 
   // ── font scale ──
