@@ -510,7 +510,7 @@
   var MIN_TEXT_LENGTH = 8;
 
   function extractPageParagraphs() {
-    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption';
+    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, dt, dd, td, th, summary';
     var all = document.querySelectorAll(selectors);
     var result = [];
     for (var i = 0; i < all.length; i++) {
