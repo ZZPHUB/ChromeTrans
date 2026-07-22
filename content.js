@@ -515,6 +515,10 @@
     layoutMode = (layoutMode + 1) % 3;
     if (layoutMode === 1) btnGroup.classList.add('ds-layout-row');
     if (layoutMode === 2) btnGroup.classList.add('ds-layout-grid');
+    // reposition if there is an active selection
+    if (selectedText && selectedRect) {
+      setTimeout(function () { positionButtonGroup(selectedRect, 0, 0); }, 0);
+    }
   }
 
   function positionButtonGroup(selRect, mx, my) {

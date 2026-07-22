@@ -13,6 +13,7 @@
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
   user-select: none;
+  box-sizing: content-box;
 }
 #ds-btn-group.ds-layout-row {
   flex-direction: row;
@@ -20,7 +21,7 @@
 #ds-btn-group.ds-layout-grid {
   flex-direction: row;
   flex-wrap: wrap;
-  width: 76px;
+  width: 72px;
 }
 
 /* ── all action buttons (shared) ── */
