@@ -383,7 +383,12 @@
     if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn, #ds-pin-btn')) return;
     if (isPinned) return;
     e.preventDefault();
+    // snapshot current position, then switch to left/top exclusively
     var rect = btnGroup.getBoundingClientRect();
+    btnGroup.style.right = 'auto';
+    btnGroup.style.bottom = 'auto';
+    btnGroup.style.left = rect.left + 'px';
+    btnGroup.style.top = rect.top + 'px';
     dragState = {
       type: 'drag-group',
       startX: e.clientX, startY: e.clientY,
