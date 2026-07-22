@@ -1,6 +1,6 @@
-var SYSTEM_TRANSLATE = 'You are an English-to-Chinese translator. Output only the translation. No explanations, no notes, no extra text.';
+var SYSTEM_TRANSLATE = 'You are a translator. Translate the user input into Simplified Chinese (简体中文). Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 var SYSTEM_CHAT = 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.';
-var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate each paragraph below. Paragraphs are separated by "===PARA_SEP===". Output translations separated by "===PARA_SEP===", same order and count. Do not add or remove paragraphs. Output only translations, no extra text.';
+var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate each paragraph below into Simplified Chinese (简体中文). Paragraphs are separated by "===PARA_SEP===". Output translations separated by "===PARA_SEP===", same order and count, in Chinese only. Do not add or remove paragraphs. Output only Chinese translations, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 
 var FULL_PARAGRAPH_SEPARATOR = '\n\n===PARA_SEP===\n\n';
 
