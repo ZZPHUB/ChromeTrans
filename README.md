@@ -10,7 +10,7 @@ Select text on any webpage to **translate**, **chat**, or **full-page translate*
 | **Chat** 💬 | Multi-turn conversation with DeepSeek about the full page content. Markdown rendering for code blocks, lists, tables, and more. Glassmorphism bubble (2/3 viewport) with teal gradient header, centered in the viewport. Conversation history is preserved across close/reopen. |
 | **Full Translate** 📄 | Toggle full-page translation. Translates visible paragraphs on-demand and inserts them inline below each original. Scrolls auto-translate new paragraphs. Translation results are cached across toggles. Code blocks (`<pre>`, `<code>`, `<kbd>`, `<samp>`, `<var>`) and elements with `translate="no"` / `.notranslate` are automatically excluded. |
 | **Pin** 📌 | Lock the button group in place. When pinned, the group won't move with text selection or dragging. Unpin to restore normal behavior. |
-| **Button group** | Four icon buttons (🌐 💬 📄 📌) in a single draggable panel at the bottom-right. The group snaps to your mouse position after you select text. Activated buttons pulse with a colored glow. |
+| **Button group** | Four icon buttons (🌐 💬 📄 📌) in a draggable panel. Positions adjacent to the selection (never covers it). Double-click the gap to cycle layouts: 1×4 vertical, 4×1 horizontal, 2×2 grid. Activated buttons pulse with a colored glow. |
 | **Font scale** | Slider in the popup (0.5x – 2.0x) scales all UI relative to the current page's base font size. |
 | **Bubble controls** | Both translate and chat bubbles are draggable (by the title bar) and resizable (by the bottom-right handle). Resize handle and scrollbars appear on hover for a clean look. Bubbles animate in with a smooth scale+fade effect. |
 
@@ -31,7 +31,8 @@ Select text on any webpage to **translate**, **chat**, or **full-page translate*
 | Chat about the page | Click teal **C** (💬) button → bubble opens centered at 2/3 viewport → type questions → Enter or Send |
 | Full-page translate | Click orange **FT** (📄) button → toggle on/off |
 | Lock button position | Click gray **P** (📌) button → turns pink to indicate pinned |
-| Move the button group | Drag the gap between buttons, or select text to snap it to your mouse position (only when unpinned) |
+| Move the button group | Drag the gap between buttons, or select text to snap it near the selection (only when unpinned) |
+| Change button layout | Double-click the gap between buttons to cycle: 1×4 → 4×1 → 2×2 |
 
 ## Project Structure
 
