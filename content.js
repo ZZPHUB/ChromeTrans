@@ -270,18 +270,29 @@
   }
 
   function insertTranslation(paragraph, translation) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'ds-trans-pair';
     var transEl = document.createElement('div');
     transEl.className = 'ds-translated';
     transEl.textContent = translation;
-    paragraph.el.insertAdjacentElement('afterend', transEl);
+    // wrap original and translation in a shared container
+    paragraph.el.parentNode.insertBefore(wrapper, paragraph.el);
+    wrapper.appendChild(paragraph.el);
+    wrapper.appendChild(transEl);
     paragraph.el.dataset.dsTranslated = '1';
   }
 
   function removeAllTranslations() {
-    var all = document.querySelectorAll('.ds-translated');
-    for (var i = 0; i < all.length; i++) all[i].remove();
-    for (var j = 0; j < pageParagraphs.length; j++) {
-      delete pageParagraphs[j].el.dataset.dsTranslated;
+    var pairs = document.querySelectorAll('.ds-trans-pair');
+    for (var i = 0; i < pairs.length; i++) {
+      var wrapper = pairs[i];
+      var original = wrapper.querySelector('[data-ds-translated]');
+      if (original) {
+        delete original.dataset.dsTranslated;
+        // unwrap: move original back to parent before removing wrapper
+        wrapper.parentNode.insertBefore(original, wrapper);
+      }
+      wrapper.remove();
     }
   }
 

@@ -480,15 +480,24 @@
 
 .ds-msg-assistant img { max-width: 100%; border-radius: 4px; }
 
-/* ── inline-inserted translation paragraphs ── */
-.ds-translated {
-  margin: 4px 0 16px 0;
-  padding: 8px 12px;
+/* ── inline-inserted translation pairs ── */
+.ds-trans-pair {
+  margin: 10px 0;
+  padding: 10px 14px;
   border-left: 3px solid #e67e22;
-  background: rgba(230,126,34,0.05);
-  color: #5f6368;
-  font-style: italic;
+  background: rgba(230,126,34,0.04);
+  border-radius: 0 6px 6px 0;
   line-height: 1.6;
+}
+.ds-trans-pair [data-ds-translated] {
+  color: #888;
+}
+.ds-trans-pair .ds-translated {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px dashed rgba(230,126,34,0.25);
+  color: #1a1a1a;
+  font-style: normal;
   word-break: break-word;
 }
 
