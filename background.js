@@ -1,8 +1,6 @@
 var SYSTEM_TRANSLATE = 'You are a translator. Translate the user input into Simplified Chinese (简体中文). Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 var SYSTEM_CHAT = 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.';
-var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate each paragraph below into Simplified Chinese (简体中文). Paragraphs are separated by "===PARA_SEP===". Output translations separated by "===PARA_SEP===", same order and count, in Chinese only. Do not add or remove paragraphs. Output only Chinese translations, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
-
-var FULL_PARAGRAPH_SEPARATOR = '\n\n===PARA_SEP===\n\n';
+var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate the user input into Simplified Chinese (简体中文). Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type === 'translate') {
@@ -50,22 +48,19 @@ async function handleFullTranslate(msg, sendResponse) {
   var apiKey = await getApiKey(sendResponse);
   if (!apiKey) return;
 
-  var paragraphs = msg.paragraphs || [];
-  if (paragraphs.length === 0) {
-    sendResponse({ translations: [] });
+  var text = msg.text || '';
+  if (!text) {
+    sendResponse({ translation: '' });
     return;
   }
-
-  var input = paragraphs.join(FULL_PARAGRAPH_SEPARATOR);
 
   try {
     var result = await callDeepSeek([
       { role: 'system', content: SYSTEM_FULL_TRANSLATE },
-      { role: 'user', content: input }
+      { role: 'user', content: text }
     ], apiKey);
 
-    var translations = result.split(FULL_PARAGRAPH_SEPARATOR).map(function (t) { return t.trim(); });
-    sendResponse({ translations: translations });
+    sendResponse({ translation: result });
   } catch (err) {
     sendResponse({ error: err.message });
   }

@@ -270,23 +270,21 @@
     if (uncached.length === 0) return;
 
     ftBtn.classList.add('ds-loading');
-    try {
-      var res = await chrome.runtime.sendMessage({
-        type: 'fullTranslate',
-        paragraphs: uncached.map(function (p) { return p.text; })
-      });
-
-      if (res.error) { ftBtn.classList.remove('ds-loading'); return; }
-
-      for (var i = 0; i < uncached.length && i < res.translations.length; i++) {
-        var p = uncached[i];
-        var trans = res.translations[i];
-        if (!trans || p.el.dataset.dsTranslated) continue;
-        translationCache[p.text] = trans;
-        insertTranslation(p, trans);
+    for (var i = 0; i < uncached.length; i++) {
+      var p = uncached[i];
+      if (p.el.dataset.dsTranslated) continue;
+      try {
+        var res = await chrome.runtime.sendMessage({
+          type: 'fullTranslate',
+          text: p.text
+        });
+        if (res.translation) {
+          translationCache[p.text] = res.translation;
+          insertTranslation(p, res.translation);
+        }
+      } catch (err) {
+        // continue to next paragraph
       }
-    } catch (err) {
-      // ignore
     }
     ftBtn.classList.remove('ds-loading');
   }
