@@ -176,15 +176,15 @@
 
     cInput.value = '';
 
-    cBubble.style.width = '';
-    cBubble.style.height = '';
+    cBubble.style.width = Math.round(window.innerWidth * 2 / 3) + 'px';
+    cBubble.style.height = Math.round(window.innerHeight * 2 / 3) + 'px';
     cBubble.style.display = 'block';
     cBtn.classList.add('ds-active');
 
-    var cw = 380;
-    var ch = 440;
-    var bx = Math.max(12, (window.innerWidth - cw) / 2);
-    var by = Math.max(12, (window.innerHeight - ch) / 2);
+    var bw = Math.round(window.innerWidth * 2 / 3);
+    var bh = Math.round(window.innerHeight * 2 / 3);
+    var bx = Math.max(12, (window.innerWidth - bw) / 2);
+    var by = Math.max(12, (window.innerHeight - bh) / 2);
     cBubble.style.left = bx + 'px';
     cBubble.style.top  = by + 'px';
 
