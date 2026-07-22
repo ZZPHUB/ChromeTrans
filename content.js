@@ -290,6 +290,8 @@
   }
 
   function insertTranslation(paragraph, translation) {
+    // skip if already translated (safety guard)
+    if (paragraph.el.dataset.dsTranslated) return;
     // save both texts permanently, show translation by default
     paragraph.el.dataset.dsOriginal = paragraph.el.textContent;
     paragraph.el.dataset.dsTranslation = translation;
