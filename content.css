@@ -158,11 +158,15 @@
 
 .ds-t-resize {
   flex-shrink: 0;
-  height: 10px;
+  height: 8px;
   cursor: nwse-resize;
+  background: transparent;
+  transition: background 0.2s;
+  user-select: none;
+}
+.ds-t-resize:hover {
   background: linear-gradient(135deg, transparent 40%, #c8ccd0 40%, #c8ccd0 48%, transparent 48%),
               linear-gradient(135deg, transparent 60%, #c8ccd0 60%, #c8ccd0 68%, transparent 68%);
-  user-select: none;
 }
 
 /* ── chat bubble ── */
@@ -252,11 +256,15 @@
   background: transparent;
 }
 .ds-c-messages::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.12);
+  background: transparent;
   border-radius: 4px;
+  transition: background 0.3s;
+}
+.ds-c-messages:hover::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
 }
 .ds-c-messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.25);
 }
 
 .ds-msg {
@@ -327,11 +335,15 @@
 
 .ds-c-resize {
   flex-shrink: 0;
-  height: 10px;
+  height: 8px;
   cursor: nwse-resize;
+  background: transparent;
+  transition: background 0.2s;
+  user-select: none;
+}
+.ds-c-resize:hover {
   background: linear-gradient(135deg, transparent 40%, #c8ccd0 40%, #c8ccd0 48%, transparent 48%),
               linear-gradient(135deg, transparent 60%, #c8ccd0 60%, #c8ccd0 68%, transparent 68%);
-  user-select: none;
 }
 
 /* ── bubble open animation ── */
@@ -348,8 +360,15 @@
   background: transparent;
 }
 .ds-t-result::-webkit-scrollbar-thumb {
-  background: #d0d5dd;
+  background: transparent;
   border-radius: 4px;
+  transition: background 0.3s;
+}
+.ds-t-result:hover::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+}
+.ds-t-result::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
 }
 
 /* ── markdown rendered content ── */
