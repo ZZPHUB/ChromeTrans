@@ -59,6 +59,16 @@
 #ds-ft-btn:hover { background: #d35400; transform: scale(1.1); }
 #ds-ft-btn:active { transform: scale(0.95); }
 #ds-ft-btn.ds-active { background: #c0392b; }
+#ds-ft-btn.ds-loading svg { display: none; }
+#ds-ft-btn.ds-loading::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
 
 /* ── pin button ── */
 #ds-pin-btn {

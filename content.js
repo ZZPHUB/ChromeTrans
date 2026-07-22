@@ -21,28 +21,28 @@
   // ── translate button ──
   var tBtn = document.createElement('div');
   tBtn.id = 'ds-t-btn';
-  tBtn.textContent = 'T';
+  tBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>';
   tBtn.title = 'Translate';
   btnGroup.appendChild(tBtn);
 
   // ── chat button ──
   var cBtn = document.createElement('div');
   cBtn.id = 'ds-c-btn';
-  cBtn.textContent = 'C';
+  cBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg>';
   cBtn.title = 'Chat';
   btnGroup.appendChild(cBtn);
 
   // ── full-translate button ──
   var ftBtn = document.createElement('div');
   ftBtn.id = 'ds-ft-btn';
-  ftBtn.textContent = 'FT';
+  ftBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="9" y2="9"/></svg>';
   ftBtn.title = 'Full Translate';
   btnGroup.appendChild(ftBtn);
 
   // ── pin button ──
   var pinBtn = document.createElement('div');
   pinBtn.id = 'ds-pin-btn';
-  pinBtn.textContent = 'P';
+  pinBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="8 5 16 5 12 2 8 5"/><circle cx="12" cy="21" r="1.5"/></svg>';
   pinBtn.title = 'Pin';
   btnGroup.appendChild(pinBtn);
 
@@ -240,14 +240,14 @@
 
     if (uncached.length === 0) return;
 
-    ftBtn.textContent = '...';
+    ftBtn.classList.add('ds-loading');
     try {
       var res = await chrome.runtime.sendMessage({
         type: 'fullTranslate',
         paragraphs: uncached.map(function (p) { return p.text; })
       });
 
-      if (res.error) { ftBtn.textContent = 'FT'; return; }
+      if (res.error) { ftBtn.classList.remove('ds-loading'); return; }
 
       for (var i = 0; i < uncached.length && i < res.translations.length; i++) {
         var p = uncached[i];
@@ -259,7 +259,7 @@
     } catch (err) {
       // ignore
     }
-    ftBtn.textContent = 'FT';
+    ftBtn.classList.remove('ds-loading');
   }
 
   function insertTranslation(paragraph, translation) {
