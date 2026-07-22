@@ -291,7 +291,10 @@
         var trans = translations[i];
         if (trans) {
           translationCache[p.text] = trans;
-          insertTranslation(p, trans);
+          if (trans !== p.text) {
+            // only insert if actually translated (code kept as-is by DeepSeek)
+            insertTranslation(p, trans);
+          }
         }
       }
     } catch (err) {
@@ -513,7 +516,7 @@
   var MIN_TEXT_LENGTH = 4;
 
   function extractPageParagraphs() {
-    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, dt, dd, td, th, summary';
+    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, dt, dd, td, th, summary, caption, a, label';
     var all = document.querySelectorAll(selectors);
     var result = [];
     for (var i = 0; i < all.length; i++) {

@@ -1,6 +1,6 @@
 var SYSTEM_TRANSLATE = 'You are a translator. Translate the user input into Simplified Chinese (简体中文). Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 var SYSTEM_CHAT = 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.';
-var SYSTEM_FULL_TRANSLATE = 'Translate each [SEG_N] segment into Simplified Chinese (简体中文). Keep the [SEG_N] markers exactly as-is. Do not skip or merge segments. Use the full context for accurate, natural translations. Output only the translations with markers, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
+var SYSTEM_FULL_TRANSLATE = 'Translate each [SEG_N] segment into Simplified Chinese (简体中文). Keep the [SEG_N] markers exactly as-is. Do not skip or merge segments. IMPORTANT: Do NOT translate code blocks, commands, technical syntax, URLs, or configuration examples — keep those exactly as the original. Only translate natural language prose. Output only the segments with markers, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type === 'translate') {
