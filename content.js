@@ -7,6 +7,7 @@
   var isChatting = false;
   var isFullTransActive = false;
   var isPinned = false;
+  var layoutMode = 0; // 0=1x4 vertical, 1=4x1 horizontal, 2=2x2 grid
   var dragState = null;
   var chatContext = '';
   var chatHistory = [];
@@ -83,13 +84,7 @@
         selectedRect = null;
       }
       if (selectedText && !isPinned) {
-        var gRect = btnGroup.getBoundingClientRect();
-        var newRight = window.innerWidth - mx - gRect.width / 2;
-        var newBottom = window.innerHeight - my - gRect.height / 2;
-        newRight = Math.max(0, Math.min(newRight, window.innerWidth - gRect.width));
-        newBottom = Math.max(0, Math.min(newBottom, window.innerHeight - gRect.height));
-        btnGroup.style.right = newRight + 'px';
-        btnGroup.style.bottom = newBottom + 'px';
+        positionButtonGroup(selectedRect, mx, my);
       }
     }, 10);
   });
@@ -377,15 +372,23 @@
     };
   });
 
+  // ── double-click group gap to cycle layout ──
+  btnGroup.addEventListener('dblclick', function (e) {
+    if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn, #ds-pin-btn')) return;
+    cycleLayout();
+  });
+
   // ── drag (button group) ──
   btnGroup.addEventListener('mousedown', function (e) {
     if (e.target.closest('#ds-t-btn, #ds-c-btn, #ds-ft-btn, #ds-pin-btn')) return;
     if (isPinned) return;
     e.preventDefault();
+    var rect = btnGroup.getBoundingClientRect();
     dragState = {
       type: 'drag-group',
       startX: e.clientX, startY: e.clientY,
-      offsetX: 0, offsetY: 0
+      startLeft: rect.left,
+      startTop: rect.top
     };
   });
 
@@ -418,11 +421,8 @@
       cBubble.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
       cBubble.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
     } else if (dragState.type === 'drag-group') {
-      var dx = e.clientX - dragState.startX;
-      var dy = e.clientY - dragState.startY;
-      dragState.offsetX = dx;
-      dragState.offsetY = dy;
-      btnGroup.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      btnGroup.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
+      btnGroup.style.top  = (dragState.startTop  + e.clientY - dragState.startY) + 'px';
     } else if (dragState.type === 'resize-t') {
       var w = Math.max(200, dragState.startW + e.clientX - dragState.startX);
       var h = Math.max(80,  dragState.startH + e.clientY - dragState.startY);
@@ -437,12 +437,6 @@
   });
 
   document.addEventListener('mouseup', function () {
-    if (dragState && dragState.type === 'drag-group') {
-      var rect = btnGroup.getBoundingClientRect();
-      btnGroup.style.right = (window.innerWidth - rect.right) + 'px';
-      btnGroup.style.bottom = (window.innerHeight - rect.bottom) + 'px';
-      btnGroup.style.transform = '';
-    }
     dragState = null;
   });
 
@@ -514,6 +508,61 @@
       el = el.parentElement;
     }
     return false;
+  }
+
+  function cycleLayout() {
+    btnGroup.classList.remove('ds-layout-row', 'ds-layout-grid');
+    layoutMode = (layoutMode + 1) % 3;
+    if (layoutMode === 1) btnGroup.classList.add('ds-layout-row');
+    if (layoutMode === 2) btnGroup.classList.add('ds-layout-grid');
+  }
+
+  function positionButtonGroup(selRect, mx, my) {
+    var gRect = btnGroup.getBoundingClientRect();
+    var gw = gRect.width;
+    var gh = gRect.height;
+    var gap = 10;
+    var left, top;
+
+    // try positions around the selection, avoiding overlap
+    if (selRect && selRect.width > 0 && selRect.height > 0) {
+      // 1) right of selection, vertically centered
+      left = selRect.right + gap;
+      top = selRect.top + selRect.height / 2 - gh / 2;
+      if (left + gw > window.innerWidth) left = window.innerWidth - gw - gap;
+
+      // 2) if still would overlap or out of bounds, try below
+      if (left + gw > window.innerWidth || top < gap || top + gh > window.innerHeight - gap ||
+          (left < selRect.right && top + gh > selRect.top && top < selRect.bottom)) {
+        left = selRect.left + selRect.width / 2 - gw / 2;
+        top = selRect.bottom + gap;
+      }
+
+      // 3) if below doesn't fit, try above
+      if (top + gh > window.innerHeight - gap || left < gap ||
+          (top < selRect.bottom && left + gw > selRect.left && left < selRect.right)) {
+        top = selRect.top - gh - gap;
+      }
+
+      // 4) if above doesn't fit, try left of selection
+      if (top < gap) {
+        left = selRect.left - gw - gap;
+        top = selRect.top + selRect.height / 2 - gh / 2;
+      }
+    } else {
+      // fallback: near mouse
+      left = mx - gw / 2;
+      top = my - gh - gap;
+    }
+
+    // clamp to viewport
+    left = Math.max(gap, Math.min(left, window.innerWidth - gw - gap));
+    top = Math.max(gap, Math.min(top, window.innerHeight - gh - gap));
+
+    btnGroup.style.right = 'auto';
+    btnGroup.style.bottom = 'auto';
+    btnGroup.style.left = left + 'px';
+    btnGroup.style.top = top + 'px';
   }
 
   // ── font scale ──

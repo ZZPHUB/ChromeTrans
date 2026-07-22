@@ -14,6 +14,14 @@
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
   user-select: none;
 }
+#ds-btn-group.ds-layout-row {
+  flex-direction: row;
+}
+#ds-btn-group.ds-layout-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 76px;
+}
 
 /* ── all action buttons (shared) ── */
 #ds-t-btn,
