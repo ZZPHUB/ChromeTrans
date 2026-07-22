@@ -1,6 +1,6 @@
 var SYSTEM_TRANSLATE = 'You are a translator. Translate the user input into Simplified Chinese (简体中文). Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 var SYSTEM_CHAT = 'You are a helpful assistant. Answer questions about the provided text concisely and accurately.';
-var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate the user input into Simplified Chinese (简体中文). Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
+var SYSTEM_FULL_TRANSLATE = 'You are a translator. Translate the text after "---TRANSLATE---" into Simplified Chinese (简体中文). Use the surrounding context before and after to understand the topic and produce an accurate, natural translation. Output only the Chinese translation. No explanations, no notes, no extra text. Never output Japanese, Korean, or any other non-Chinese language.';
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type === 'translate') {
@@ -54,10 +54,17 @@ async function handleFullTranslate(msg, sendResponse) {
     return;
   }
 
+  var contextBefore = msg.contextBefore || '';
+  var contextAfter = msg.contextAfter || '';
+  var userContent = '';
+  if (contextBefore) userContent += 'Context (previous paragraph):\n' + contextBefore + '\n\n';
+  userContent += '---TRANSLATE---\n' + text;
+  if (contextAfter) userContent += '\n\nContext (next paragraph):\n' + contextAfter;
+
   try {
     var result = await callDeepSeek([
       { role: 'system', content: SYSTEM_FULL_TRANSLATE },
-      { role: 'user', content: text }
+      { role: 'user', content: userContent }
     ], apiKey);
 
     sendResponse({ translation: result });

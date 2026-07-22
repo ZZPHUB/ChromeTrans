@@ -273,10 +273,16 @@
     for (var i = 0; i < uncached.length; i++) {
       var p = uncached[i];
       if (p.el.dataset.dsTranslated) continue;
+      // find neighbors for context
+      var pIdx = pageParagraphs.indexOf(p);
+      var contextBefore = pIdx > 0 ? pageParagraphs[pIdx - 1].text : '';
+      var contextAfter = pIdx < pageParagraphs.length - 1 ? pageParagraphs[pIdx + 1].text : '';
       try {
         var res = await chrome.runtime.sendMessage({
           type: 'fullTranslate',
-          text: p.text
+          text: p.text,
+          contextBefore: contextBefore,
+          contextAfter: contextAfter
         });
         if (res.translation) {
           translationCache[p.text] = res.translation;
@@ -499,7 +505,7 @@
 
   // ── helpers ──
   var SKIP_TAGS = { PRE: 1, CODE: 1, KBD: 1, SAMP: 1, VAR: 1 };
-  var SKIP_ANCESTOR_TAGS = { NAV: 1, HEADER: 1, FOOTER: 1, ASIDE: 1, MENU: 1, BUTTON: 1, SELECT: 1, TIME: 1, DETAILS: 1, SUMMARY: 1 };
+  var SKIP_ANCESTOR_TAGS = { NAV: 1, HEADER: 1, FOOTER: 1, ASIDE: 1, MENU: 1 };
   var SKIP_CLASS_PATTERNS = /(^|[_-])(blob-code|line-number|commit|sha|hash|timestamp|mono|signature|avatar|breadcrumb|pagination|sidebar)([_-]|$)/i;
   var MIN_TEXT_LENGTH = 8;
 
@@ -554,7 +560,7 @@
   function isProseContent(text) {
     // skip only if clearly code (very high symbol ratio)
     var nonProse = text.match(/[^\p{L}\p{N}\s.,;:!?()\-—""''一-鿿㐀-䶿]/gu) || [];
-    if (nonProse.length / text.length > 0.5) return false;
+    if (nonProse.length / text.length > 0.65) return false;
     return true;
   }
 
