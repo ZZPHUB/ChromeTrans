@@ -478,7 +478,7 @@
   // ── helpers ──
   var SKIP_TAGS = { PRE: 1, CODE: 1, KBD: 1, SAMP: 1, VAR: 1 };
   var SKIP_ANCESTOR_TAGS = { NAV: 1, HEADER: 1, FOOTER: 1, ASIDE: 1, MENU: 1, BUTTON: 1, SELECT: 1, TIME: 1, DETAILS: 1, SUMMARY: 1 };
-  var SKIP_CLASS_PATTERNS = /nav|menu|sidebar|footer|banner|breadcrumb|pagination|meta|label|badge|button|btn|mono|commit|sha|hash|timestamp|blob-code|line-number|signature|avatar/i;
+  var SKIP_CLASS_PATTERNS = /(^|[_-])(blob-code|line-number|commit|sha|hash|timestamp|mono|signature|avatar|breadcrumb|pagination|sidebar)([_-]|$)/i;
   var MIN_TEXT_LENGTH = 8;
 
   function extractPageParagraphs() {
@@ -530,15 +530,9 @@
   }
 
   function isProseContent(text) {
-    // skip if more than 40% of characters are non-alphabetic/non-CJK symbols
-    var alphaCJK = text.match(/[\p{L}\p{N}\s.,;:!?()\-—""''一-鿿㐀-䶿]/gu) || [];
-    var ratio = alphaCJK.length / text.length;
-    if (ratio < 0.6) return false;
-    // skip if it looks like a short UI label (no sentence structure)
-    if (text.length < 20 && text.indexOf('.') === -1 && text.indexOf('。') === -1 && text.indexOf('，') === -1) {
-      var words = text.split(/\s+/);
-      if (words.length <= 3) return false;
-    }
+    // skip only if clearly code (very high symbol ratio)
+    var nonProse = text.match(/[^\p{L}\p{N}\s.,;:!?()\-—""''一-鿿㐀-䶿]/gu) || [];
+    if (nonProse.length / text.length > 0.5) return false;
     return true;
   }
 
