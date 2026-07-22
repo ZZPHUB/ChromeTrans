@@ -482,36 +482,25 @@
 
 /* ── toggle button for original/translation ── */
 .ds-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 6px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+  display: inline;
+  margin-left: 5px;
   color: #b0b5bd;
   cursor: pointer;
-  background: transparent;
-  transition: color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition: color 0.2s;
   user-select: none;
-  vertical-align: middle;
 }
 .ds-toggle-btn svg {
-  display: block;
+  display: inline;
+  vertical-align: -2px;
 }
 .ds-toggle-btn:hover {
   color: #1a73e8;
-  background: rgba(26,115,232,0.08);
-  box-shadow: 0 1px 4px rgba(26,115,232,0.15);
 }
 .ds-toggle-btn.ds-showing-original {
   color: #e67e22;
-  background: rgba(230,126,34,0.06);
 }
 .ds-toggle-btn.ds-showing-original:hover {
   color: #d35400;
-  background: rgba(230,126,34,0.12);
-  box-shadow: 0 1px 4px rgba(230,126,34,0.2);
 }
 
 /* ── spinner ── */
