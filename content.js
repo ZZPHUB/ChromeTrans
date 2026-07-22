@@ -6,7 +6,6 @@
   var isTranslating = false;
   var isChatting = false;
   var isFullTransActive = false;
-  var fullTranslateMode = 'split'; // 'split' = coexist, 'replace' = replace original
   var isPinned = false;
   var layoutMode = 2; // 0=1x4 vertical, 1=4x1 horizontal, 2=2x2 grid (default)
   var dragState = null;
@@ -40,7 +39,7 @@
   var ftBtn = document.createElement('div');
   ftBtn.id = 'ds-ft-btn';
   ftBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="9" y2="9"/></svg>';
-  ftBtn.title = 'Full Translate (split mode)';
+  ftBtn.title = 'Full Translate';
   btnGroup.appendChild(ftBtn);
 
   // ── pin button ──
@@ -89,6 +88,27 @@
         positionButtonGroup(selectedRect, mx, my);
       }
     }, 10);
+  });
+
+  // ── toggle original/translation ──
+  document.addEventListener('click', function (e) {
+    var toggle = e.target.closest('.ds-toggle-btn');
+    if (!toggle) return;
+    var paragraph = toggle.previousElementSibling;
+    if (!paragraph || !paragraph.dataset.dsTranslated) return;
+    if (paragraph.dataset.dsShowing === 'translation') {
+      paragraph.textContent = paragraph.dataset.dsOriginal;
+      paragraph.dataset.dsShowing = 'original';
+      toggle.textContent = '译';
+      toggle.title = 'Show translation';
+      toggle.classList.add('ds-showing-original');
+    } else {
+      paragraph.textContent = paragraph.dataset.dsTranslation;
+      paragraph.dataset.dsShowing = 'translation';
+      toggle.textContent = '原';
+      toggle.title = 'Show original';
+      toggle.classList.remove('ds-showing-original');
+    }
   });
 
   // ── scroll triggers full-translate update ──
@@ -212,31 +232,18 @@
     }
   });
 
-  // right-click FT to toggle mode
-  ftBtn.addEventListener('contextmenu', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    fullTranslateMode = fullTranslateMode === 'split' ? 'replace' : 'split';
-    ftBtn.title = 'Full Translate (' + fullTranslateMode + ' mode)';
-    // re-apply if active
-    if (isFullTransActive) {
-      deactivateFullTranslate();
-      activateFullTranslate();
-    }
-  });
-
   function activateFullTranslate() {
     isFullTransActive = true;
     pageParagraphs = extractPageParagraphs();
     ftBtn.classList.add('ds-active');
-    ftBtn.title = 'Full Translate (' + fullTranslateMode + ' mode, active)';
+    ftBtn.title = 'Full Translate (active)';
     translateVisibleBatch();
   }
 
   function deactivateFullTranslate() {
     isFullTransActive = false;
     ftBtn.classList.remove('ds-active');
-    ftBtn.title = 'Full Translate (' + fullTranslateMode + ' mode)';
+    ftBtn.title = 'Full Translate';
     removeAllTranslations();
     pageParagraphs = [];
     if (scrollTimer) clearTimeout(scrollTimer);
@@ -285,49 +292,32 @@
   }
 
   function insertTranslation(paragraph, translation) {
-    if (fullTranslateMode === 'replace') {
-      // replace: save original, then overwrite text content
-      paragraph.el.dataset.dsOriginal = paragraph.el.textContent;
-      paragraph.el.textContent = translation;
-      paragraph.el.dataset.dsTranslated = '1';
-    } else {
-      // split: wrap original and translation in a shared container
-      var wrapper = document.createElement('div');
-      wrapper.className = 'ds-trans-pair';
-      var transEl = document.createElement('div');
-      transEl.className = 'ds-translated';
-      transEl.textContent = translation;
-      paragraph.el.parentNode.insertBefore(wrapper, paragraph.el);
-      wrapper.appendChild(paragraph.el);
-      wrapper.appendChild(transEl);
-      paragraph.el.dataset.dsTranslated = '1';
-    }
+    // save both texts permanently, show translation by default
+    paragraph.el.dataset.dsOriginal = paragraph.el.textContent;
+    paragraph.el.dataset.dsTranslation = translation;
+    paragraph.el.textContent = translation;
+    paragraph.el.dataset.dsTranslated = '1';
+    paragraph.el.dataset.dsShowing = 'translation';
+    // insert toggle button after paragraph
+    var toggle = document.createElement('span');
+    toggle.className = 'ds-toggle-btn';
+    toggle.textContent = '原';
+    toggle.title = 'Show original';
+    paragraph.el.insertAdjacentElement('afterend', toggle);
   }
 
   function removeAllTranslations() {
-    if (fullTranslateMode === 'replace') {
-      // restore original text from saved data
-      var all = document.querySelectorAll('[data-ds-translated]');
-      for (var i = 0; i < all.length; i++) {
-        var el = all[i];
-        if (el.dataset.dsOriginal !== undefined) {
-          el.textContent = el.dataset.dsOriginal;
-          delete el.dataset.dsOriginal;
-        }
-        delete el.dataset.dsTranslated;
-      }
-    } else {
-      // unwrap split-mode pairs
-      var pairs = document.querySelectorAll('.ds-trans-pair');
-      for (var i = 0; i < pairs.length; i++) {
-        var wrapper = pairs[i];
-        var original = wrapper.querySelector('[data-ds-translated]');
-        if (original) {
-          delete original.dataset.dsTranslated;
-          wrapper.parentNode.insertBefore(original, wrapper);
-        }
-        wrapper.remove();
-      }
+    // restore all originals and remove toggle buttons
+    var toggles = document.querySelectorAll('.ds-toggle-btn');
+    for (var i = 0; i < toggles.length; i++) toggles[i].remove();
+    var all = document.querySelectorAll('[data-ds-translated]');
+    for (var j = 0; j < all.length; j++) {
+      var el = all[j];
+      el.textContent = el.dataset.dsOriginal || el.textContent;
+      delete el.dataset.dsOriginal;
+      delete el.dataset.dsTranslation;
+      delete el.dataset.dsShowing;
+      delete el.dataset.dsTranslated;
     }
   }
 
