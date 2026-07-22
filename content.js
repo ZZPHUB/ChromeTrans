@@ -270,7 +270,7 @@
     if (uncached.length === 0) return;
 
     ftBtn.classList.add('ds-loading');
-    var CHUNK = 30;
+    var CHUNK = 20;
     for (var chunkStart = 0; chunkStart < uncached.length; chunkStart += CHUNK) {
       var chunk = uncached.slice(chunkStart, Math.min(chunkStart + CHUNK, uncached.length));
       // build request for this chunk
