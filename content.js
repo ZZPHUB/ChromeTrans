@@ -6,6 +6,7 @@
   var isTranslating = false;
   var isChatting = false;
   var isFullTransActive = false;
+  var fullTranslateMode = 'split'; // 'split' = coexist, 'replace' = replace original
   var isPinned = false;
   var layoutMode = 2; // 0=1x4 vertical, 1=4x1 horizontal, 2=2x2 grid (default)
   var dragState = null;
@@ -39,7 +40,7 @@
   var ftBtn = document.createElement('div');
   ftBtn.id = 'ds-ft-btn';
   ftBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="9" y2="9"/></svg>';
-  ftBtn.title = 'Full Translate';
+  ftBtn.title = 'Full Translate (split mode)';
   btnGroup.appendChild(ftBtn);
 
   // ── pin button ──
@@ -211,18 +212,31 @@
     }
   });
 
+  // right-click FT to toggle mode
+  ftBtn.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fullTranslateMode = fullTranslateMode === 'split' ? 'replace' : 'split';
+    ftBtn.title = 'Full Translate (' + fullTranslateMode + ' mode)';
+    // re-apply if active
+    if (isFullTransActive) {
+      deactivateFullTranslate();
+      activateFullTranslate();
+    }
+  });
+
   function activateFullTranslate() {
     isFullTransActive = true;
     pageParagraphs = extractPageParagraphs();
     ftBtn.classList.add('ds-active');
-    ftBtn.title = 'Full Translate (active)';
+    ftBtn.title = 'Full Translate (' + fullTranslateMode + ' mode, active)';
     translateVisibleBatch();
   }
 
   function deactivateFullTranslate() {
     isFullTransActive = false;
     ftBtn.classList.remove('ds-active');
-    ftBtn.title = 'Full Translate';
+    ftBtn.title = 'Full Translate (' + fullTranslateMode + ' mode)';
     removeAllTranslations();
     pageParagraphs = [];
     if (scrollTimer) clearTimeout(scrollTimer);
@@ -271,29 +285,49 @@
   }
 
   function insertTranslation(paragraph, translation) {
-    var wrapper = document.createElement('div');
-    wrapper.className = 'ds-trans-pair';
-    var transEl = document.createElement('div');
-    transEl.className = 'ds-translated';
-    transEl.textContent = translation;
-    // wrap original and translation in a shared container
-    paragraph.el.parentNode.insertBefore(wrapper, paragraph.el);
-    wrapper.appendChild(paragraph.el);
-    wrapper.appendChild(transEl);
-    paragraph.el.dataset.dsTranslated = '1';
+    if (fullTranslateMode === 'replace') {
+      // replace: save original, then overwrite text content
+      paragraph.el.dataset.dsOriginal = paragraph.el.textContent;
+      paragraph.el.textContent = translation;
+      paragraph.el.dataset.dsTranslated = '1';
+    } else {
+      // split: wrap original and translation in a shared container
+      var wrapper = document.createElement('div');
+      wrapper.className = 'ds-trans-pair';
+      var transEl = document.createElement('div');
+      transEl.className = 'ds-translated';
+      transEl.textContent = translation;
+      paragraph.el.parentNode.insertBefore(wrapper, paragraph.el);
+      wrapper.appendChild(paragraph.el);
+      wrapper.appendChild(transEl);
+      paragraph.el.dataset.dsTranslated = '1';
+    }
   }
 
   function removeAllTranslations() {
-    var pairs = document.querySelectorAll('.ds-trans-pair');
-    for (var i = 0; i < pairs.length; i++) {
-      var wrapper = pairs[i];
-      var original = wrapper.querySelector('[data-ds-translated]');
-      if (original) {
-        delete original.dataset.dsTranslated;
-        // unwrap: move original back to parent before removing wrapper
-        wrapper.parentNode.insertBefore(original, wrapper);
+    if (fullTranslateMode === 'replace') {
+      // restore original text from saved data
+      var all = document.querySelectorAll('[data-ds-translated]');
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
+        if (el.dataset.dsOriginal !== undefined) {
+          el.textContent = el.dataset.dsOriginal;
+          delete el.dataset.dsOriginal;
+        }
+        delete el.dataset.dsTranslated;
       }
-      wrapper.remove();
+    } else {
+      // unwrap split-mode pairs
+      var pairs = document.querySelectorAll('.ds-trans-pair');
+      for (var i = 0; i < pairs.length; i++) {
+        var wrapper = pairs[i];
+        var original = wrapper.querySelector('[data-ds-translated]');
+        if (original) {
+          delete original.dataset.dsTranslated;
+          wrapper.parentNode.insertBefore(original, wrapper);
+        }
+        wrapper.remove();
+      }
     }
   }
 
