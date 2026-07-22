@@ -43,6 +43,7 @@
 }
 #ds-t-btn:hover { background: #1557b0; transform: scale(1.1); }
 #ds-t-btn:active { transform: scale(0.95); }
+#ds-t-btn.ds-active { animation: ds-pulse-t 1.6s ease-in-out infinite; }
 
 /* ── chat button ── */
 #ds-c-btn {
@@ -50,6 +51,7 @@
 }
 #ds-c-btn:hover { background: #0f766e; transform: scale(1.1); }
 #ds-c-btn:active { transform: scale(0.95); }
+#ds-c-btn.ds-active { animation: ds-pulse-c 1.6s ease-in-out infinite; }
 
 /* ── full-translate button ── */
 #ds-ft-btn {
@@ -58,7 +60,7 @@
 }
 #ds-ft-btn:hover { background: #d35400; transform: scale(1.1); }
 #ds-ft-btn:active { transform: scale(0.95); }
-#ds-ft-btn.ds-active { background: #c0392b; }
+#ds-ft-btn.ds-active { background: #ff1744; animation: ds-pulse-ft 1.6s ease-in-out infinite; }
 #ds-ft-btn.ds-loading svg { display: none; }
 #ds-ft-btn.ds-loading::after {
   content: '';
@@ -77,12 +79,12 @@
 }
 #ds-pin-btn:hover { background: #757575; transform: scale(1.1); }
 #ds-pin-btn:active { transform: scale(0.95); }
-#ds-pin-btn.ds-pinned { background: #c62828; }
-#ds-pin-btn.ds-pinned:hover { background: #b71c1c; }
+#ds-pin-btn.ds-pinned { background: #e91e63; animation: ds-pulse-pin 1.6s ease-in-out infinite; }
+#ds-pin-btn.ds-pinned:hover { background: #c2185b; }
 
 /* ── button group pinned state ── */
 #ds-btn-group.ds-pinned {
-  box-shadow: 0 2px 14px rgba(198, 40, 40, 0.25);
+  box-shadow: 0 2px 14px rgba(233, 30, 99, 0.25);
 }
 
 /* ── translate bubble ── */
@@ -393,3 +395,19 @@
   animation: ds-spin 0.7s linear infinite;
 }
 @keyframes ds-spin { to { transform: rotate(360deg); } }
+@keyframes ds-pulse-ft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(255, 23, 68, 0); }
+}
+@keyframes ds-pulse-pin {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(233, 30, 99, 0); }
+}
+@keyframes ds-pulse-t {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(26, 115, 232, 0); }
+}
+@keyframes ds-pulse-c {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
+}

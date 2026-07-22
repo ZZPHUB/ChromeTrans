@@ -99,8 +99,8 @@
   // ── click outside dismisses bubbles ──
   document.addEventListener('mousedown', function (e) {
     if (!isOurUI(e.target)) {
-      tBubble.style.display = 'none';
-      cBubble.style.display = 'none';
+      closeBubble(tBubble);
+      closeBubble(cBubble);
     }
   });
 
@@ -121,6 +121,7 @@
     tBubble.style.width = '';
     tBubble.style.height = '';
     tBubble.style.display = 'block';
+    tBtn.classList.add('ds-active');
     var bw = 320;
     var bh = tBubble.offsetHeight;
     var bx = rect.right + 8;
@@ -165,6 +166,7 @@
     cBubble.style.width = '';
     cBubble.style.height = '';
     cBubble.style.display = 'block';
+    cBtn.classList.add('ds-active');
 
     var rect = cBtn.getBoundingClientRect();
     var bx = rect.right + 8;
@@ -440,6 +442,8 @@
 
   function closeBubble(el) {
     el.style.display = 'none';
+    if (el === tBubble) tBtn.classList.remove('ds-active');
+    if (el === cBubble) cBtn.classList.remove('ds-active');
   }
 
   // ── chat input auto-resize ──
