@@ -270,27 +270,32 @@
     if (uncached.length === 0) return;
 
     ftBtn.classList.add('ds-loading');
+    // build one request for all uncached paragraphs with numbered markers
+    var parts = [];
     for (var i = 0; i < uncached.length; i++) {
-      var p = uncached[i];
-      if (p.el.dataset.dsTranslated) continue;
-      // find neighbors for context
-      var pIdx = pageParagraphs.indexOf(p);
-      var contextBefore = pIdx > 0 ? pageParagraphs[pIdx - 1].text : '';
-      var contextAfter = pIdx < pageParagraphs.length - 1 ? pageParagraphs[pIdx + 1].text : '';
-      try {
-        var res = await chrome.runtime.sendMessage({
-          type: 'fullTranslate',
-          text: p.text,
-          contextBefore: contextBefore,
-          contextAfter: contextAfter
-        });
-        if (res.translation) {
-          translationCache[p.text] = res.translation;
-          insertTranslation(p, res.translation);
+      parts.push('[SEG_' + i + ']\n' + uncached[i].text);
+    }
+    var fullText = parts.join('\n\n');
+
+    try {
+      var res = await chrome.runtime.sendMessage({
+        type: 'fullTranslate',
+        text: fullText,
+        count: uncached.length
+      });
+      // parse translations by marker and apply
+      var translations = parseSegments(res.translation || '', uncached.length);
+      for (var i = 0; i < uncached.length; i++) {
+        var p = uncached[i];
+        if (p.el.dataset.dsTranslated) continue;
+        var trans = translations[i];
+        if (trans) {
+          translationCache[p.text] = trans;
+          insertTranslation(p, trans);
         }
-      } catch (err) {
-        // continue to next paragraph
       }
+    } catch (err) {
+      // ignore
     }
     ftBtn.classList.remove('ds-loading');
   }
@@ -529,6 +534,23 @@
       if (text.length > MIN_TEXT_LENGTH) {
         result.push({ el: el, text: text });
       }
+    }
+    return result;
+  }
+
+  function parseSegments(raw, count) {
+    var result = [];
+    for (var i = 0; i < count; i++) {
+      var marker = '[SEG_' + i + ']';
+      var start = raw.indexOf(marker);
+      if (start === -1) { result.push(''); continue; }
+      start += marker.length;
+      var end = raw.length;
+      for (var j = i + 1; j < count; j++) {
+        var pos = raw.indexOf('[SEG_' + j + ']', start);
+        if (pos !== -1) { end = pos; break; }
+      }
+      result.push(raw.substring(start, end).trim());
     }
     return result;
   }
