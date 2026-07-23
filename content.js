@@ -498,20 +498,20 @@
   }
 
   // ── helpers ──
-  var SKIP_TAGS = { PRE: 1, CODE: 1 };
+  var SKIP_TAGS = { PRE: 1, CODE: 1, KBD: 1, SAMP: 1, VAR: 1 };
+  var SKIP_ANCESTOR_TAGS = { NAV: 1, HEADER: 1, FOOTER: 1, ASIDE: 1, MENU: 1, BUTTON: 1, SELECT: 1, TIME: 1, DETAILS: 1, SUMMARY: 1 };
+  var SKIP_CLASS_PATTERNS = /(^|[_-])(blob-code|line-number|commit|sha|hash|timestamp|mono|signature|avatar|breadcrumb|pagination|sidebar)([_-]|$)/i;
+  var MIN_TEXT_LENGTH = 8;
 
   function extractPageParagraphs() {
-    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, dt, dd, td, th, summary, caption, a, label';
+    var selectors = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption';
     var all = document.querySelectorAll(selectors);
     var result = [];
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       if (el.offsetParent === null && el.tagName !== 'BODY') continue;
       if (el.closest('#ds-t-bubble, #ds-c-bubble, #ds-btn-group')) continue;
-      // skip code elements and paragraphs containing code
-      if (SKIP_TAGS[el.tagName]) continue;
-      if (el.querySelector && (el.querySelector('pre') || el.querySelector('code'))) continue;
-      if (el.getAttribute && el.getAttribute('translate') === 'no') continue;
+      if (shouldSkipTranslate(el)) continue;
 
       var contained = false;
       for (var j = 0; j < all.length; j++) {
@@ -520,11 +520,37 @@
       if (contained) continue;
 
       var text = el.textContent.trim();
-      if (text) {
+      if (text.length >= MIN_TEXT_LENGTH && isProseContent(text)) {
         result.push({ el: el, text: text });
       }
     }
     return result;
+  }
+
+  function shouldSkipTranslate(el) {
+    var cur = el;
+    while (cur && cur !== document.body) {
+      if (cur.getAttribute && cur.getAttribute('translate') === 'no') return true;
+      if (cur.classList && cur.classList.contains('notranslate')) return true;
+      if (SKIP_TAGS[cur.tagName]) return true;
+      if (SKIP_ANCESTOR_TAGS[cur.tagName]) return true;
+      if (cur.classList && matchesSkipClass(cur.classList)) return true;
+      cur = cur.parentElement;
+    }
+    return false;
+  }
+
+  function matchesSkipClass(classList) {
+    for (var i = 0; i < classList.length; i++) {
+      if (SKIP_CLASS_PATTERNS.test(classList[i])) return true;
+    }
+    return false;
+  }
+
+  function isProseContent(text) {
+    var nonProse = text.match(/[^\p{L}\p{N}\s.,;:!?()\-—""''一-鿿㐀-䶿]/gu) || [];
+    if (nonProse.length / text.length > 0.5) return false;
+    return true;
   }
 
   function isOurUI(el) {
