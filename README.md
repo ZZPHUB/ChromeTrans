@@ -45,8 +45,6 @@ ChromeTrans/
 ├── markdown.js         # Markdown-to-HTML renderer for chat responses
 ├── popup.html          # Popup — API Key input + font scale slider
 ├── popup.js            # Popup logic — save/load settings
-├── gen_icons.py        # Icon generator (requires Pillow)
-├── icons/              # Generated PNG icons (16, 48, 128)
 └── .gitignore
 ```
 
